@@ -14,18 +14,21 @@ files = [os.path.join(INPUT_DIR, file)
 
 jsonlines = jsonlines_handler.read_several_jsonlines_files(files)
 
-# we need a text variable (list) for each line to store the text
+# extract text (into one variable) and annotations (into another one) for all annotator
 all_texts = dict()
 all_annotations = dict()
 
 for annotator in jsonlines:
+    # todo replace annotator_path with annotator name to increase legibility
     documents = jsonlines[annotator]
     annotations = dict()
 
     for document in documents:
-        document_id, text, labels = document['id'], document['text'], document['label']
+        document_id = document['id']
+        text = document['text']
+        labels = document['label']
 
-        # process raw text
+        # process raw text and make sure it's the same as for the texts "already seen before"
         if document_id in all_texts:
             if all_texts[document_id] != text:
                 print(f"- ID '{document_id}' already exists but text not the same:",
