@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 
 import jsonlines_handler
@@ -9,18 +8,20 @@ from utils import extract_annotator_name
 INPUT_DIR = os.path.join(DATA_DIR, '1-unzip')
 OUTPUT_DIR = os.path.join(DATA_DIR, '2-all-annotations-in-one-file')
 
-files = [os.path.join(INPUT_DIR, file)
-         for file in os.listdir(INPUT_DIR)
-         if file.endswith('.jsonl') and 'admin' not in file]
-
 print("Processing Step 2: Merge all annotators into one unified dataset")
 print(f"- Unzipped data is located at '{INPUT_DIR}'")
 print(f"- Dataset will be written to '{OUTPUT_DIR}'")
 
-jsonlines = jsonlines_handler.read_several_jsonlines_files(files)
-print(f"- Read JSONlines from {len(jsonlines)} annotator(s)")
+# get JSONlines fils and read all of them
+files = [os.path.join(INPUT_DIR, file)
+         for file in os.listdir(INPUT_DIR)
+         if file.endswith('.jsonl') and 'admin' not in file]
+print(f"- Identified {len(files)} relevant files to be read")
 
-print("- increase legibility by renaming path with annotator names")
+jsonlines = jsonlines_handler.read_several_jsonlines_files(files)
+print(f"- Imported JSONlines from {len(jsonlines)} annotator(s)")
+
+print("- Increase legibility by renaming path with annotator names")
 annotator_names = []
 for annotator_path in jsonlines:
     annotator_name = extract_annotator_name(annotator_path)
@@ -30,12 +31,12 @@ for old_name, new_name in zip(list(jsonlines.keys()), annotator_names):
 del annotator_name, annotator_names, annotator_path, new_name, old_name
 
 # extract text (into one variable) and annotations (into another one) for all annotator
-print(f"- extract text and annotations for all {len(jsonlines)} annotators")
+print(f"- Extract text and annotations for all {len(jsonlines)} annotators")
 texts_dict = dict()
 annotations_dict = dict()
 
 for annotator in jsonlines:
-    print(f"  * processing {annotator}'s annotations")
+    print(f"  * Processing {annotator}'s annotations")
     documents = jsonlines[annotator]
     annotations = dict()
 
@@ -61,10 +62,10 @@ for annotator in jsonlines:
 del annotator, annotations, document, documents, document_id, text, labels
 
 # data frame for all annotations
-# todo this can be done much more elegantly
-print("- generate dataframe for annotations")
+print("- Generate dataframe for annotations")
 df_entries_list = list()
 for annotator in annotations_dict:
+    # todo this can be done much more elegantly by avoiding the double for-loop
     annotator_entries = list()
     annotations = annotations_dict[annotator]
 
@@ -94,18 +95,19 @@ for annotator in annotations_dict:
 
 annotations_df = pd.DataFrame(df_entries_list)
 
-print("- generate dataframe for texts")
+print("- Generate dataframe for texts")
 texts_df = pd.DataFrame.from_dict(texts_dict, orient='index')
+texts_df.rename(columns={0: 'text'}, inplace=True)
 
 # materialise the results
 texts_path = os.path.join(OUTPUT_DIR, "text.csv")
 annotations_path = os.path.join(OUTPUT_DIR, "annotations.csv")
 
-print(f"- materialise dataframes to '{texts_path}' and '{annotations_path}'")
+print(f"- Materialise dataframes to '{texts_path}' and '{annotations_path}'")
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"  created non-existing output directory '{OUTPUT_DIR}'")
-texts_df.to_csv(texts_path)
-annotations_df.to_csv(annotations_path)
+texts_df.to_csv(texts_path, index_label='document_id')
+annotations_df.to_csv(annotations_path, index_label='annotation_id')
 
-print("- finished creating unified dataset")
+print("- Finished creating unified dataset")
