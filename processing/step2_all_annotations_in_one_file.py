@@ -7,7 +7,7 @@ from project_paths import DATA_DIR
 from utils import extract_annotator_name
 
 INPUT_DIR = os.path.join(DATA_DIR, '1-unzip')
-OUTPUT_DIR = os.path.join(DATA_DIR, '2-unified-dataset')
+OUTPUT_DIR = os.path.join(DATA_DIR, '2-all-annotations-in-one-file')
 
 files = [os.path.join(INPUT_DIR, file)
          for file in os.listdir(INPUT_DIR)
