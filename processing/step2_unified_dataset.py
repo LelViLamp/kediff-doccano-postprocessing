@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 import jsonlines_handler
@@ -30,8 +31,8 @@ del annotator_name, annotator_names, annotator_path, new_name, old_name
 
 # extract text (into one variable) and annotations (into another one) for all annotator
 print(f"- extract text and annotations for all {len(jsonlines)} annotators")
-all_texts = dict()
-all_annotations = dict()
+texts_dict = dict()
+annotations_dict = dict()
 
 for annotator in jsonlines:
     print(f"  * processing {annotator}'s annotations")
@@ -44,26 +45,28 @@ for annotator in jsonlines:
         labels = document['label']
 
         # process raw text and make sure it's the same as for the texts "already seen before"
-        if document_id in all_texts:
-            if all_texts[document_id] != text:
+        if document_id in texts_dict:
+            if texts_dict[document_id] != text:
                 print(f"    ID '{document_id}' already exists but text not the same:",
-                      f"      - previous text:    '{all_texts[document_id]}'",
+                      f"      - previous text:    '{texts_dict[document_id]}'",
                       f"      - this text:        '{text}'", sep='\n')
         else:
-            all_texts[document_id] = text
+            texts_dict[document_id] = text
 
         # accumulate annotations
         annotations[document_id] = labels
 
     # append annotations
-    all_annotations[annotator] = annotations
+    annotations_dict[annotator] = annotations
 del annotator, annotations, document, documents, document_id, text, labels
 
 # data frame for all annotations
-all_entries = list()
-for annotator in all_annotations:
+# todo this can be done much more elegantly
+print("- generate dataframe for annotations")
+df_entries_list = list()
+for annotator in annotations_dict:
     annotator_entries = list()
-    annotations = all_annotations[annotator]
+    annotations = annotations_dict[annotator]
 
     for line_id in annotations:
         labels = annotations[line_id]
@@ -72,7 +75,7 @@ for annotator in all_annotations:
             end = annotation[1]
             label = annotation[2]
 
-            line_text = all_texts[line_id]
+            line_text = texts_dict[line_id]
             line_text_length = len(line_text)
             label_text = line_text[start:end]
             label_text_length = len(label_text)
@@ -87,9 +90,22 @@ for annotator in all_annotations:
             }
             annotator_entries.append(new_entry)
 
-    all_entries.extend(annotator_entries)
+    df_entries_list.extend(annotator_entries)
 
-df = pd.DataFrame(all_entries)
+annotations_df = pd.DataFrame(df_entries_list)
 
-# df as csv
+print("- generate dataframe for texts")
+texts_df = pd.DataFrame.from_dict(texts_dict, orient='index')
 
+# materialise the results
+texts_path = os.path.join(OUTPUT_DIR, "text.csv")
+annotations_path = os.path.join(OUTPUT_DIR, "annotations.csv")
+
+print(f"- materialise dataframes to '{texts_path}' and '{annotations_path}'")
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print(f"  created non-existing output directory '{OUTPUT_DIR}'")
+texts_df.to_csv(texts_path)
+annotations_df.to_csv(annotations_path)
+
+print("- finished creating unified dataset")
