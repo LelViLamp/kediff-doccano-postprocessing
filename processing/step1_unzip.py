@@ -4,7 +4,7 @@ from project_paths import *
 
 OUTPUT_DIR = os.path.join(DATA_DIR, '1-unzip')
 
-print("Unzipping archive exported from doccano")
+print("Processing Step 1: Unzipping archive exported from doccano")
 print(f"- Data is located at '{DATA_DIR}'")
 print(f"- Raw data is located at '{RAW_DATA_DIR}'")
 
