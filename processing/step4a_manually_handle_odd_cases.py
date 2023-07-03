@@ -4,7 +4,7 @@ import pandas as pd
 from project_paths import DATA_DIR
 
 INPUT_DIR = os.path.join(DATA_DIR, '3-automatic-cleaning')
-OUTPUT_DIR = os.path.join(DATA_DIR, '4-manually-handle-odd-cases')
+OUTPUT_DIR = os.path.join(DATA_DIR, '4a-manually-handle-odd-cases')
 
 print("Processing Step 4: Manually identify and handle odd cases")
 print(f"- Data imported from '{INPUT_DIR}'")
