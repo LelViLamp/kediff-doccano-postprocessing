@@ -186,10 +186,13 @@ del index, row, label_text, start, end
 print("  * applied cleaning heuristics")
 
 automatically_cleaned_path = os.path.join(OUTPUT_DIR, 'automatically_cleaned.csv')
-print(f"- Materialise dataframe to '{automatically_cleaned_path}'")
+text_path = text_path.replace(INPUT_DIR, OUTPUT_DIR)
+
+print(f"- Materialise dataframes to '{automatically_cleaned_path}' and '{text_path}'")
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"  created non-existing output directory '{OUTPUT_DIR}'")
 annotations_df.to_csv(automatically_cleaned_path, index=False)
+text_df.to_csv(text_path, index=False)
 
 print("- Finished automatic cleaning")
