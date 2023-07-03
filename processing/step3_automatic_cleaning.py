@@ -185,7 +185,7 @@ del index, row, label_text, start, end
 
 print("  * applied cleaning heuristics")
 
-automatically_cleaned_path = os.path.join(OUTPUT_DIR, 'automatically_cleaned.csv')
+automatically_cleaned_path = os.path.join(OUTPUT_DIR, 'automatically_cleaned_annotations.csv')
 text_path = text_path.replace(INPUT_DIR, OUTPUT_DIR)
 
 print(f"- Materialise dataframes to '{automatically_cleaned_path}' and '{text_path}'")

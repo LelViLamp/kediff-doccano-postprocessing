@@ -11,7 +11,7 @@ print(f"- Data imported from '{INPUT_DIR}'")
 print(f"- Result will be written to '{OUTPUT_DIR}'")
 
 text_path = os.path.join(INPUT_DIR, 'text.csv')
-annotations_path = os.path.join(INPUT_DIR, 'automatically_cleaned.csv')
+annotations_path = os.path.join(INPUT_DIR, 'automatically_cleaned_annotations.csv')
 
 text_df = pd.read_csv(text_path)
 annotations_df = pd.read_csv(annotations_path)
@@ -52,6 +52,7 @@ print(f"- Identified {len(long_annotations)} annotations that are 100 or more ch
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"  created non-existing output directory '{OUTPUT_DIR}'")
+
 long_annotations_path = os.path.join(OUTPUT_DIR, 'long_annotations.csv')
 long_annotations.to_csv(long_annotations_path)
 print(f"  * Stored them to '{long_annotations_path}'",
