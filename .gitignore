@@ -267,3 +267,7 @@ $RECYCLE.BIN/
 
 # PyCharm workspace configuration
 .idea/*
+
+# R(Studio) exclusions
+.Rproj.user
+.Rhistory
