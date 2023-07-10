@@ -5,7 +5,8 @@ import step4a_manually_handle_odd_cases as s4a
 
 print("",
       "************************************************************************************",
-      f"Please see \"{s4a.long_annotations_path}\" to manually check long annotations and then press any key in the console",
+      f"Please see \"{s4a.long_annotations_path}\"",
+      f"to manually check long annotations and then press any key in the console",
       "************************************************************************************",
       "",
       sep='\n')
