@@ -16,10 +16,6 @@ annotations_path = os.path.join(INPUT_DIR, 'cleaned_annotations.csv')
 text_path = os.path.join(INPUT_DIR, 'text.csv')
 
 annotations_df = pd.read_csv(annotations_path, index_col=0)
-
-# todo remove this line
-annotations_df = annotations_df[annotations_df['line_id'] <= 200]
-
 text_df = pd.read_csv(text_path, index_col=0)
 
 print(f"- Remove annotator column as it is no longer useful")
@@ -42,39 +38,47 @@ for document_id in tqdm(document_ids):
 
     # only regard labels of the same category for merging
     found_labels = current_annotations['label'].sort_values().unique().tolist()
+
     for label in found_labels:
         currently_regarded_labels = current_annotations.query(f"label == '{label}'")
 
-        base_range = range(len(currently_regarded_labels))
+        # because I find dataframes weird to use, we'll now switch to list structures
+        currently_regarded_labels_converted = [(index, row.to_dict()) for index, row in pd.DataFrame.iterrows(currently_regarded_labels)]
+
+        base_range = range(0, len(currently_regarded_labels_converted))
         for i in base_range:
-            base_label = currently_regarded_labels.iloc[i]
+            base_entry = currently_regarded_labels_converted[i]
+            base_index = base_entry[0]
+            base_label = base_entry[1]
 
-            candidate_range = range(i + 1, len(currently_regarded_labels))
+            candidate_range = range(i + 1, len(currently_regarded_labels_converted))
             for j in candidate_range:
-                if base_label['delete_me']:
-                    continue
-
-                candidate_label = currently_regarded_labels.iloc[j]
+                candidate_entry = currently_regarded_labels_converted[j]
+                candidate_index = candidate_entry[0]
+                candidate_label = candidate_entry[1]
 
                 if base_label['start'] <= candidate_label['start'] < base_label['end']:
                     # merge into candidate label and delete base_label
                     candidate_label['start'] = min(base_label['start'], candidate_label['start'])
                     candidate_label['end'] = max(base_label['end'], candidate_label['end'])
-                    candidate_label['merged'] = True
 
-                    # delete base_label from all regarded datasets
                     base_label['delete_me'] = True
+                    candidate_label['merged'] = True
+                    candidate_label['annotation_id'] = "_".join([str(base_label['annotation_id']), str(candidate_label['annotation_id'])])
 
-                    # propagate updates of base_label and candidate_label
-                    annotations_df.loc[base_label.name] = base_label
-                    current_annotations.loc[base_label.name] = base_label
-                    currently_regarded_labels.loc[base_label.name] = base_label
+                    # label_text for candidate_label
+                    candidate_label['label_text'] = text_df.loc[candidate_label['line_id'] - 1]['text'][candidate_label['start']:candidate_label['end']]
 
-                    annotations_df.loc[candidate_label.name] = candidate_label
-                    current_annotations.loc[candidate_label.name] = candidate_label
-                    currently_regarded_labels.loc[candidate_label.name] = candidate_label
+                    # because we merged, we need to (manually) change the looping behaviour to disregard
+                    # no-more-existent base_label
+                    break
                     # end if merge condition satisfied
                 # end loop candidate_range
+
+            # if base_label was merged into candidate_label, make candidate_label
+            # new base_label, i.e., move on in for loop
+            if base_label['delete_me']:
+                continue
             # end loop base_range
         # end loop found_labels
     # end loop document_ids
