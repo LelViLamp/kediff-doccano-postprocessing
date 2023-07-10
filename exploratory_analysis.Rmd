@@ -1,0 +1,73 @@
+---
+title: "Exploratory Analysis of the OALZ 1788/Q1 Annotation Dataset"
+output: html_notebook
+---
+
+```{r eval=TRUE, echo=FALSE, message=FALSE}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load("ggplot2", "here", "tidyverse")
+```
+
+```{r}
+all_annotations_path <- here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv")
+all_annotations <- read_csv(all_annotations_path)
+names(all_annotations)[1] <- "pandas_index"
+
+union_dataset_path <- here::here("data", "5-generate-union-dataset", "union_dataset.csv")
+union_annotations <- read_csv(union_dataset_path)
+names(union_annotations)[1] <- "pandas_index"
+```
+
+Global Distribution of Labels
+```{r}
+data.frame(
+  group=LETTERS[1:5],
+  value=c(13,7,9,21,2)
+) %>%
+  ggplot(aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+```
+
+```{r}
+doccano_colour_scheme <- c(
+  'ATTENTION'= '#f44e3b',
+  'EVENT'= '#0062b1',
+  'LOC'= '#7b64ff',
+  'MISC'= '#a79c4f',
+  'ORG'= '#16a5a5',
+  'PER'= '#fcdc00',
+  'Personal Bookmark'= '#fda1ff',
+  'POSTCORR'= '#9f0500',
+  'TIME'= '#73d8ff',
+  '?'= '#cccccc'
+)
+```
+
+
+```{r}
+# create pie chart: https://r-graph-gallery.com/piechart-ggplot2.html
+# relative frequencies: https://homepages.gac.edu/~anienow2/MCS_142/R/ggplot2-barchart.html --> set aes(x = "")
+# manual category colours: https://statisticsglobe.com/change-colors-of-bars-in-ggplot2-barchart-in-r
+# change legend's title: https://www.geeksforgeeks.org/how-to-change-legend-title-in-ggplot2-in-r/
+
+union_annotations %>%
+  # compute annotation length per category
+  mutate(annotation_length = end - start) %>%
+  group_by(label) %>%
+  summarise(
+    total_length = sum(annotation_length),
+    n = n(),
+  ) %>%
+  
+  # plot it
+  ggplot(aes(x = "", y = total_length, fill = label)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  
+  # use colours as in doccano
+  scale_fill_manual(values = doccano_colour_scheme) +
+  theme_void() +
+  labs(fill = "Label")
+```
+

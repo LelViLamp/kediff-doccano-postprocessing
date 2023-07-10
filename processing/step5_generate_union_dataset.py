@@ -19,6 +19,8 @@ text_path = os.path.join(INPUT_DIR, 'text.csv')
 annotations_df = pd.read_csv(annotations_path, index_col=0)
 text_df = pd.read_csv(text_path, index_col=0)
 
+# annotations_df = annotations_df[:200] # for debug
+
 print(f"- Remove annotator column as it is no longer useful")
 annotations_df.drop(labels=['annotator'], axis="columns", inplace=True)
 
@@ -117,11 +119,14 @@ print(f"- {updateCount:,} annotations were merged, which caused {deletionCount:,
       f"{unchangedCount:,} annotations were left unchanged.",
       sep=" ")
 
+print(f"- Remove 'delete_me' column as it only contains 'False' now")
+annotations_df.drop(['delete_me'], axis="columns", inplace=True)
+
 print(f"- Generate JSON Lines object")
 json_lines = []
 # loop over dataframe
 document_ids = annotations_df['line_id'].sort_values().unique().tolist()
-for _, line in tqdm(text_df.iterrows()):
+for _, line in tqdm(text_df.iterrows(), total=len(text_df)):
     entry = {
         "id": line[0],
         "text": line[1],
