@@ -1,6 +1,6 @@
 import os
-
 import pandas as pd
+from collections import defaultdict
 from tqdm import tqdm
 
 from project_paths import DATA_DIR
@@ -30,6 +30,7 @@ annotations_df['delete_me'] = len(annotations_df) * [False]
 print(f"- Loop over all {len(annotations_df):,} annotations for {len(text_df):,} documents and merge overlapping annotations of the same label")
 
 document_ids = annotations_df['line_id'].sort_values().unique().tolist()
+merge_result = defaultdict(lambda: defaultdict(lambda: list()))
 for document_id in tqdm(document_ids):
     # get annotations for current document
     current_annotations = (annotations_df
@@ -81,7 +82,11 @@ for document_id in tqdm(document_ids):
                 continue
             # end loop base_range
         # end loop found_labels
+
+        merge_result[document_id][label].append(currently_regarded_labels_converted)
     # end loop document_ids
+
+# todo convert/merge back into df
 
 print(f"- {len(annotations_df[annotations_df['delete_me'] == True])} annotations were merged")
 
