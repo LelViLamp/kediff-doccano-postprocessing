@@ -3,6 +3,7 @@ import pandas as pd
 from collections import defaultdict
 from tqdm import tqdm
 
+import jsonlines_handler
 from project_paths import DATA_DIR
 
 INPUT_DIR = os.path.join(DATA_DIR, '4b-handle-long-annotations')
@@ -17,9 +18,6 @@ text_path = os.path.join(INPUT_DIR, 'text.csv')
 
 annotations_df = pd.read_csv(annotations_path, index_col=0)
 text_df = pd.read_csv(text_path, index_col=0)
-
-# todo remove this
-annotations_df = annotations_df[:200]
 
 print(f"- Remove annotator column as it is no longer useful")
 annotations_df.drop(labels=['annotator'], axis="columns", inplace=True)
@@ -94,13 +92,13 @@ print(f"- Merge result generated. Now apply it to dataframe")
 deletionCount = 0
 unchangedCount = 0
 updateCount = 0
-for document_id in merge_result:
+for document_id in tqdm(merge_result):
     labels = merge_result[document_id]
     for label in labels:
         annotations = labels[label]
         for index, updated_annotation in annotations:
             if updated_annotation['delete_me']:
-                annotations_df = annotations_df.drop(index)
+                annotations_df.drop(index, inplace=True)
                 deletionCount += 1
             elif updated_annotation['merged']:
                 updateCount += 1
@@ -116,9 +114,40 @@ for document_id in merge_result:
     # end loop over documents
 
 print(f"- {updateCount:,} annotations were merged, which caused {deletionCount:,} annotations to be deleted.",
-      f"{unchangedCount:,} annotations were left unchanged. Gets materialised now.",
+      f"{unchangedCount:,} annotations were left unchanged.",
       sep=" ")
 
-# todo materialise
+print(f"- Generate JSON Lines object")
+json_lines = []
+# loop over dataframe
+document_ids = annotations_df['line_id'].sort_values().unique().tolist()
+for _, line in tqdm(text_df.iterrows()):
+    entry = {
+        "id": line[0],
+        "text": line[1],
+        "label": []
+    }
+
+    if entry['id'] in document_ids:
+        doc_annotations = annotations_df.query(f"line_id == {entry['id']}")
+        for _, values in pd.DataFrame.iterrows(doc_annotations):
+            entry['label'].append([values['start'], values['end'], values['label']])
+        # end if has annotations
+
+    json_lines.append(entry)
+    # end loop over text_df's lines
+
+print(f"- Materialise union dataset to {OUTPUT_DIR}")
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print(f"  created non-existing output directory '{OUTPUT_DIR}'")
+
+union_dataset_path_csv = os.path.join(OUTPUT_DIR, 'union_dataset.csv')
+annotations_df.to_csv(union_dataset_path_csv)
+print(f"  * Saved merged annotations as CSV to '{union_dataset_path_csv}'")
+
+union_dataset_path_jsonl = os.path.join(OUTPUT_DIR, 'union_dataset.jsonl')
+jsonlines_handler.write_jsonlines_file(json_lines, union_dataset_path_jsonl)
+print(f"  * Saved merged annotations as JSONL to '{union_dataset_path_jsonl}'")
 
 print("- Finished generating union dataset")

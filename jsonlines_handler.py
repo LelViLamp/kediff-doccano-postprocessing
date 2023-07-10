@@ -25,3 +25,11 @@ def read_several_jsonlines_files(filepaths: list[str]):
         deserialised[path] = o
 
     return deserialised
+
+
+def write_jsonlines_file(json_lines,
+                          filepath: str) -> None:
+    # loop over lines and write them
+    with open(filepath, "w") as f:
+        for entry in json_lines:
+            f.write(json.dumps(entry) + "\n")
