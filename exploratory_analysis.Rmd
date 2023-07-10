@@ -8,28 +8,24 @@ if (!require(pacman)) install.packages("pacman")
 pacman::p_load("ggplot2", "here", "tidyverse")
 ```
 
-```{r}
+```{r echo=FALSE}
 all_annotations_path <- here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv")
 all_annotations <- read_csv(all_annotations_path)
 names(all_annotations)[1] <- "pandas_index"
 
+all_annotations <- all_annotations %>%
+  mutate(annotation_length = end - start)
+  
+
 union_dataset_path <- here::here("data", "5-generate-union-dataset", "union_dataset.csv")
 union_annotations <- read_csv(union_dataset_path)
 names(union_annotations)[1] <- "pandas_index"
+union_annotations <- union_annotations %>%
+  mutate(annotation_length = end - start)
 ```
 
-Global Distribution of Labels
-```{r}
-data.frame(
-  group=LETTERS[1:5],
-  value=c(13,7,9,21,2)
-) %>%
-  ggplot(aes(x="", y=value, fill=group)) +
-  geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)
-```
-
-```{r}
+# Global Distribution of Labels
+```{r echo=FALSE}
 doccano_colour_scheme <- c(
   'ATTENTION'= '#f44e3b',
   'EVENT'= '#0062b1',
@@ -45,7 +41,7 @@ doccano_colour_scheme <- c(
 ```
 
 
-```{r}
+```{r echo=FALSE}
 # create pie chart: https://r-graph-gallery.com/piechart-ggplot2.html
 # relative frequencies: https://homepages.gac.edu/~anienow2/MCS_142/R/ggplot2-barchart.html --> set aes(x = "")
 # manual category colours: https://statisticsglobe.com/change-colors-of-bars-in-ggplot2-barchart-in-r
@@ -53,7 +49,6 @@ doccano_colour_scheme <- c(
 
 union_annotations %>%
   # compute annotation length per category
-  mutate(annotation_length = end - start) %>%
   group_by(label) %>%
   summarise(
     total_length = sum(annotation_length),
@@ -65,9 +60,51 @@ union_annotations %>%
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
   
-  # use colours as in doccano
+  # make it pretty
   scale_fill_manual(values = doccano_colour_scheme) +
-  theme_void() +
-  labs(fill = "Label")
+  labs(fill = "Label") +
+  theme_void()
 ```
+
+# Annotations per Annotator
+```{r echo=FALSE}
+# stacked bar chart: https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2 --> position = "fill"
+
+all_annotations %>%
+  group_by(annotator, label) %>%
+  summarise(
+    total_length = sum(annotation_length),
+    n = n(),
+  ) %>%
+  
+  # plot it as stacked bar chart
+  ggplot(aes(x = annotator, y = total_length, fill = label)) +
+  geom_bar(stat = "identity", position = "fill") +
+  
+  # make it pretty
+  scale_fill_manual(values = doccano_colour_scheme) +
+  labs(x = "Annotator", y = "Relative Label Frequency", fill = "Label") +
+  theme_classic()
+```
+
+# Annotations per Label
+```{r echo=FALSE}
+all_annotations %>%
+  group_by(annotator, label) %>%
+  summarise(
+    total_length = sum(annotation_length),
+    n = n(),
+  ) %>%
+  
+  # plot it as stacked bar chart
+  ggplot(aes(x = label, y = total_length, fill = annotator)) +
+  geom_bar(stat = "identity", position = "fill") +
+  
+  # make it pretty
+  labs(x = "Label", y = "Relative Label Frequency", fill = "Annotator") +
+  theme_classic()
+```
+
+
+
 
