@@ -31,7 +31,6 @@ print(f"- Add column 'delete_me'")
 annotations_df['delete_me'] = len(annotations_df) * [False]
 
 print(f"- Loop over all {len(annotations_df):,} annotations for {len(text_df):,} documents and merge overlapping annotations of the same label")
-
 document_ids = annotations_df['line_id'].sort_values().unique().tolist()
 merge_result = defaultdict(lambda: defaultdict(lambda: list()))
 for document_id in tqdm(document_ids):
@@ -91,15 +90,35 @@ for document_id in tqdm(document_ids):
     # end loop document_ids
 merge_result = dict(merge_result)
 
-# todo convert/merge back into df
+print(f"- Merge result generated. Now apply it to dataframe")
+deletionCount = 0
+unchangedCount = 0
+updateCount = 0
 for document_id in merge_result:
     labels = merge_result[document_id]
     for label in labels:
         annotations = labels[label]
-        for annotation in annotations:
-            if annotation['delete_me']:
-                pass
+        for index, updated_annotation in annotations:
+            if updated_annotation['delete_me']:
+                annotations_df = annotations_df.drop(index)
+                deletionCount += 1
+            elif updated_annotation['merged']:
+                updateCount += 1
+                for key in updated_annotation:
+                    # for easier
+                    current = annotations_df.loc[index, key]
+                    updated = updated_annotation[key]
+                    annotations_df.loc[index, key] = updated_annotation[key]
+            else:
+                unchangedCount += 1
+            # end loop over annotations
+        # end loop over labels
+    # end loop over documents
 
-print(f"- {len(annotations_df[annotations_df['delete_me'] == True])} annotations were merged")
+print(f"- {updateCount:,} annotations were merged, which caused {deletionCount:,} annotations to be deleted.",
+      f"{unchangedCount:,} annotations were left unchanged. Gets materialised now.",
+      sep=" ")
+
+# todo materialise
 
 print("- Finished generating union dataset")
