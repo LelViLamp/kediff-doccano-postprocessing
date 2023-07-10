@@ -18,6 +18,9 @@ text_path = os.path.join(INPUT_DIR, 'text.csv')
 annotations_df = pd.read_csv(annotations_path, index_col=0)
 text_df = pd.read_csv(text_path, index_col=0)
 
+# todo remove this
+annotations_df = annotations_df[:200]
+
 print(f"- Remove annotator column as it is no longer useful")
 annotations_df.drop(labels=['annotator'], axis="columns", inplace=True)
 
@@ -83,10 +86,19 @@ for document_id in tqdm(document_ids):
             # end loop base_range
         # end loop found_labels
 
-        merge_result[document_id][label].append(currently_regarded_labels_converted)
+        merge_result[document_id][label] = currently_regarded_labels_converted
+    merge_result[document_id] = dict(merge_result[document_id])
     # end loop document_ids
+merge_result = dict(merge_result)
 
 # todo convert/merge back into df
+for document_id in merge_result:
+    labels = merge_result[document_id]
+    for label in labels:
+        annotations = labels[label]
+        for annotation in annotations:
+            if annotation['delete_me']:
+                pass
 
 print(f"- {len(annotations_df[annotations_df['delete_me'] == True])} annotations were merged")
 
