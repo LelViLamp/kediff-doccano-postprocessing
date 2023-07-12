@@ -3,8 +3,8 @@ title: "Exploratory Analysis of the OALZ 1788/Q1 Annotation Dataset"
 output: 
   html_notebook: 
     code_folding: hide
-    fig_width: 7
     fig_height: 3
+    fig_width: 7
 ---
 
 
@@ -25,13 +25,13 @@ all_annotations <-
     annotator = factor(
       annotator,
       levels = c("cborgelt", "danielE", "danielG", "katharina", "sascha"),
-      labels = c("cb", "de", "dg", "kb", "ss")
+      labels = c("Christian", "Daniel E.", "Daniel G.", "Katharina", "Sascha")
     ),
     line_id = factor(line_id),
     label = factor(
       label,
-      # levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
-      # labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
+      levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
     ),
     
     annotation_length = end - start
@@ -49,8 +49,8 @@ union_annotations <-
     annotation_id = factor(annotation_id),
     line_id = factor(line_id),
     label = factor(label,
-      # levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
-      # labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
+      levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
     ),
     
     annotation_length = end - start
@@ -60,7 +60,7 @@ union_annotations %>% select(-pandas_index, -annotation_id)
 ```
 
 ```{r define_doccano_colours}
-doccano_colour_scheme <- c(
+doccano_colour_scheme_technical <- c(
   'ATTENTION'= '#f44e3b',
   'EVENT'= '#0062b1',
   'LOC'= '#7b64ff',
@@ -72,7 +72,34 @@ doccano_colour_scheme <- c(
   'TIME'= '#73d8ff',
   '?'= '#cccccc'
 )
+
+doccano_colour_scheme_named <- c(
+  'Event'= '#0062b1',
+  'Location'= '#7b64ff',
+  'Miscellaneous'= '#a79c4f',
+  'Organisation'= '#16a5a5',
+  'Person'= '#fcdc00',
+  'Time'= '#73d8ff'
+)
 ```
+
+```{r define_annotator_colours}
+annotator_colour_scheme_technical = c(
+  'danielE' = '#ff7f00',
+  'katharina' = '#e4211c',
+  'cborgelt' = '#377eb8',
+  'danielG' = '#984ea3',
+  'sascha' = '#4daf4a'
+)
+annotator_colour_scheme_named = c(
+  'Daniel E.' = '#ff7f00',
+  'Katharina' = '#e4211c',
+  'Christian' = '#377eb8',
+  'Daniel G.' = '#984ea3',
+  'Sascha' = '#4daf4a'
+)
+```
+
 
 
 
@@ -130,9 +157,9 @@ global_label_length %>%
   # plot data
   ggplot(aes(x = measure, y = value, fill = label)) +
   geom_bar(stat = "identity", position = "fill") +
-  scale_fill_manual(values = doccano_colour_scheme) +
+  scale_fill_manual(values = doccano_colour_scheme_named) +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Measure", y = "Realative Frequency", fill = "Label") +
+  labs(x = "", y = "Realative Frequency", fill = "Label") +
   coord_flip() +
   theme_classic()
 ```
@@ -146,8 +173,53 @@ global_label_length %>%
   
   # make it pretty
   labs(fill = "Label") +
-  scale_fill_manual(values = doccano_colour_scheme) +
+  scale_fill_manual(values = doccano_colour_scheme_named) +
   theme_void()
+```
+
+```{r}
+annotator_contributions <-
+  all_annotations %>%
+  # compute annotation length per category
+  group_by(annotator) %>%
+  summarise(
+    total_length = sum(annotation_length),
+    n = n(),
+  ) %>%
+  mutate(
+    mean_length = total_length / n
+  )
+
+annotator_contributions
+```
+
+```{r, fig.height=2, fig.width=7}
+annotator_contributions %>%
+  # transform data
+  pivot_longer(
+    cols = c(total_length, n, mean_length),
+    names_to ="measure"
+  ) %>%
+  mutate(
+    measure = factor(
+      measure,
+      levels = c("n", "total_length", "mean_length"),
+      labels = c("Count", "Total Annotation Length", "Average Annotation Length")
+    )
+  ) %>%
+  
+  # sort nicely for debugging
+  arrange(measure, annotator) %>%
+  select(measure, annotator, value) %>%
+
+  # plot data
+  ggplot(aes(x = measure, y = value, fill = annotator)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "", y = "Realative Frequency", fill = "Annotator") +
+  scale_fill_manual(values = annotator_colour_scheme_named) +
+  coord_flip() +
+  theme_classic()
 ```
 
 
@@ -182,7 +254,7 @@ label_annotator %>%
   
   # make it pretty
   labs(x = "Annotator", y = "Relative Label Frequency", fill = "Label") +
-  scale_fill_manual(values = doccano_colour_scheme) +
+  scale_fill_manual(values = doccano_colour_scheme_named) +
   scale_y_continuous(labels = scales::percent) +
   theme_classic()
 ```
@@ -196,7 +268,7 @@ label_annotator %>%
   
   # make it pretty
   labs(x = "Label", y = "Relative Label Frequency", fill = "Annotator") +
-  scale_fill_brewer(palette = "Set1") +
+  scale_fill_manual(values = annotator_colour_scheme_named) +
   scale_y_continuous(labels = scales::percent) +
   theme_classic()
 ```
