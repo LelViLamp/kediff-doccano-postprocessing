@@ -137,7 +137,7 @@ global_label_length %>%
   theme_classic()
 ```
 
-
+Here's the same thing as a pie chart.
 ```{r plot_global_label_length, fig.height=2, fig.width=7}
 global_label_length %>%
   ggplot(aes(x = "", y = total_length, fill = label)) +
@@ -161,6 +161,7 @@ label_annotator <- all_annotations %>%
   summarise(
     total_length = sum(annotation_length),
     n = n(),
+    .groups = 'drop_last'
   ) %>%
   mutate(
     label = reorder(
