@@ -7,17 +7,17 @@ import jsonlines_handler
 from project_paths import DATA_DIR
 
 INPUT_DIR = os.path.join(DATA_DIR, '4b-handle-long-annotations')
-OUTPUT_DIR = os.path.join(DATA_DIR, '5-generate-union-dataset')
+OUTPUT_DIR = os.path.join(DATA_DIR, '5a-generate-union-dataset')
 
-print("Processing Step 5: Generate union dataset")
+print("Processing Step 5a: Generate union dataset")
 print(f"- Data imported from '{INPUT_DIR}'")
 print(f"- Result will be written to '{OUTPUT_DIR}'")
 
-annotations_path = os.path.join(INPUT_DIR, 'cleaned_annotations.csv')
-text_path = os.path.join(INPUT_DIR, 'text.csv')
+annotations_path_in = os.path.join(INPUT_DIR, 'cleaned_annotations.csv')
+text_path_in = os.path.join(INPUT_DIR, 'text.csv')
 
-annotations_df = pd.read_csv(annotations_path, index_col=0)
-text_df = pd.read_csv(text_path, index_col=0)
+annotations_df = pd.read_csv(annotations_path_in, index_col=0)
+text_df = pd.read_csv(text_path_in, index_col=0)
 
 # annotations_df = annotations_df[:200] # for debug
 
@@ -147,12 +147,16 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"  created non-existing output directory '{OUTPUT_DIR}'")
 
-union_dataset_path_csv = os.path.join(OUTPUT_DIR, 'union_dataset.csv')
-annotations_df.to_csv(union_dataset_path_csv)
-print(f"  * Saved merged annotations as CSV to '{union_dataset_path_csv}'")
+annotations_path_out_csv = os.path.join(OUTPUT_DIR, 'union_dataset.csv')
+annotations_df.to_csv(annotations_path_out_csv)
+print(f"  * Saved merged annotations as CSV to '{annotations_path_out_csv}'")
 
-union_dataset_path_jsonl = os.path.join(OUTPUT_DIR, 'union_dataset.jsonl')
-jsonlines_handler.write_jsonlines_file(json_lines, union_dataset_path_jsonl)
-print(f"  * Saved merged annotations as JSONL to '{union_dataset_path_jsonl}'")
+annotations_path_out_jsonl = os.path.join(OUTPUT_DIR, 'union_dataset.jsonl')
+jsonlines_handler.write_jsonlines_file(json_lines, annotations_path_out_jsonl)
+print(f"  * Saved merged annotations as JSONL to '{annotations_path_out_jsonl}'")
+
+text_path_out = os.path.join(OUTPUT_DIR, "text.csv")
+text_df.to_csv(text_path_out)
+print(f"  * Saved text to '{text_path_out}'")
 
 print("- Finished generating union dataset")

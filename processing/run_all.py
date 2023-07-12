@@ -14,4 +14,5 @@ input("Decide which long annotations to remove, then press any key to continue p
 print("")
 
 import step4b_handle_long_annotations
-import step5_generate_union_dataset
+import step5a_generate_union_dataset
+import step5b_merge_documents
