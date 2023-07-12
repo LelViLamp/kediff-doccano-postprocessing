@@ -10,15 +10,15 @@ output:
 
 
 # Imports
-```{r packages}
+```{r packages, message=FALSE, warning=FALSE, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load("ggplot2", "here", "scales", "tidyverse")
 ```
 
 ```{r import_all_annotations_ds}
-all_annotations_path <- here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv")
 all_annotations <-
-  read_csv(all_annotations_path) %>%
+  here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv") %>%
+  read_csv() %>%
   mutate(
     annotation_id = factor(annotation_id),
     annotator = factor(annotator),
@@ -31,9 +31,9 @@ names(all_annotations)[1] <- "pandas_index"
 ```  
 
 ```{r import_union_ds}
-union_dataset_path <- here::here("data", "5a-generate-union-dataset", "union_dataset.csv")
 union_annotations <-
-  read_csv(union_dataset_path) %>%
+  here::here("data", "5a-generate-union-dataset", "union_dataset.csv") %>%
+  read_csv() %>%
   mutate(
     annotation_id = factor(annotation_id),
     line_id = factor(line_id),
