@@ -18,7 +18,8 @@ pacman::p_load("ggplot2", "here", "scales", "tidyverse")
 ```{r import_all_annotations_ds}
 all_annotations <-
   here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv") %>%
-  read_csv() %>%
+  read.csv() %>%
+  rename(pandas_index = X) %>%
   mutate(
     annotation_id = factor(annotation_id),
     annotator = factor(
@@ -35,7 +36,6 @@ all_annotations <-
     
     annotation_length = end - start
   )
-names(all_annotations)[1] <- "pandas_index"
 
 all_annotations %>% select(-pandas_index, -annotation_id)
 ```  
@@ -43,7 +43,8 @@ all_annotations %>% select(-pandas_index, -annotation_id)
 ```{r import_union_ds}
 union_annotations <-
   here::here("data", "5a-generate-union-dataset", "union_dataset.csv") %>%
-  read_csv() %>%
+  read.csv() %>%
+  rename(pandas_index = X) %>%
   mutate(
     annotation_id = factor(annotation_id),
     line_id = factor(line_id),
@@ -54,7 +55,6 @@ union_annotations <-
     
     annotation_length = end - start
   )
-names(union_annotations)[1] <- "pandas_index"
 
 union_annotations %>% select(-pandas_index, -annotation_id)
 ```
