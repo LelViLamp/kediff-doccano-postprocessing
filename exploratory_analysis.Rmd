@@ -21,9 +21,17 @@ all_annotations <-
   read_csv() %>%
   mutate(
     annotation_id = factor(annotation_id),
-    annotator = factor(annotator),
+    annotator = factor(
+      annotator,
+      levels = c("cborgelt", "danielE", "danielG", "katharina", "sascha"),
+      labels = c("cb", "de", "dg", "kb", "ss")
+    ),
     line_id = factor(line_id),
-    label = factor(label),
+    label = factor(
+      label,
+      # levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      # labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
+    ),
     
     annotation_length = end - start
   )
@@ -39,7 +47,10 @@ union_annotations <-
   mutate(
     annotation_id = factor(annotation_id),
     line_id = factor(line_id),
-    label = factor(label),
+    label = factor(label,
+      # levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      # labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
+    ),
     
     annotation_length = end - start
   )
@@ -93,6 +104,8 @@ global_label_length$label <-
     global_label_length$label,
     global_label_length$total_length
   )
+
+global_label_length
 ```
 
 ```{r plot_global_label_info, fig.height=2, fig.width=7}
@@ -117,10 +130,10 @@ global_label_length %>%
   # plot data
   ggplot(aes(x = measure, y = value, fill = label)) +
   geom_bar(stat = "identity", position = "fill") +
-  coord_flip() +
   scale_fill_manual(values = doccano_colour_scheme) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Measure", y = "Realative Frequency", fill = "Label") +
+  coord_flip() +
   theme_classic()
 ```
 
@@ -143,7 +156,7 @@ global_label_length %>%
 
 # Labels per Annotator
 ```{r calculate_label_annotator_data}
-all_annotations <- all_annotations %>%
+label_annotator <- all_annotations %>%
   group_by(annotator, label) %>%
   summarise(
     total_length = sum(annotation_length),
@@ -162,7 +175,7 @@ all_annotations <- all_annotations %>%
 # stacked bar chart: https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2 --> position = "fill"
 
 # plot it as stacked bar chart
-all_annotations %>%
+label_annotator %>%
   ggplot(aes(x = annotator, y = total_length, fill = label)) +
   geom_bar(stat = "identity", position = "fill") +
   
@@ -176,7 +189,7 @@ all_annotations %>%
 # Annotations per Label
 ```{r plot_annotator_per_label, fig.height=3, fig.width=7}
 # plot it as stacked bar chart
-all_annotations %>%
+label_annotator %>%
   ggplot(aes(x = label, y = total_length, fill = annotator)) +
   geom_bar(stat = "identity", position = "fill") +
   
