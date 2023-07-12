@@ -28,6 +28,8 @@ all_annotations <-
     annotation_length = end - start
   )
 names(all_annotations)[1] <- "pandas_index"
+
+all_annotations %>% select(-pandas_index, -annotation_id)
 ```  
 
 ```{r import_union_ds}
@@ -42,6 +44,8 @@ union_annotations <-
     annotation_length = end - start
   )
 names(union_annotations)[1] <- "pandas_index"
+
+union_annotations %>% select(-pandas_index, -annotation_id)
 ```
 
 ```{r define_doccano_colours}
