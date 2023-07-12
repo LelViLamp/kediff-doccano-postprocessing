@@ -1,31 +1,50 @@
 ---
 title: "Exploratory Analysis of the OALZ 1788/Q1 Annotation Dataset"
-output: html_notebook
+output: 
+  html_notebook: 
+    code_folding: hide
+    fig_width: 7
+    fig_height: 3
 ---
 
-```{r packages, echo=FALSE}
+
+
+# Imports
+```{r packages}
 if (!require(pacman)) install.packages("pacman")
-pacman::p_load("ggplot2", "here", "tidyverse")
+pacman::p_load("ggplot2", "here", "scales", "tidyverse")
 ```
 
-```{r import_data, message=FALSE}
+```{r import_all_annotations_ds}
 all_annotations_path <- here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv")
-all_annotations <- read_csv(all_annotations_path)
+all_annotations <-
+  read_csv(all_annotations_path) %>%
+  mutate(
+    annotation_id = factor(annotation_id),
+    annotator = factor(annotator),
+    line_id = factor(line_id),
+    label = factor(label),
+    
+    annotation_length = end - start
+  )
 names(all_annotations)[1] <- "pandas_index"
+```  
 
-all_annotations <- all_annotations %>%
-  mutate(annotation_length = end - start)
-  
-
+```{r import_union_ds}
 union_dataset_path <- here::here("data", "5a-generate-union-dataset", "union_dataset.csv")
-union_annotations <- read_csv(union_dataset_path)
+union_annotations <-
+  read_csv(union_dataset_path) %>%
+  mutate(
+    annotation_id = factor(annotation_id),
+    line_id = factor(line_id),
+    label = factor(label),
+    
+    annotation_length = end - start
+  )
 names(union_annotations)[1] <- "pandas_index"
-union_annotations <- union_annotations %>%
-  mutate(annotation_length = end - start)
 ```
 
-# Global Distribution of Labels
-```{r doccano_colours, echo=FALSE}
+```{r define_doccano_colours}
 doccano_colour_scheme <- c(
   'ATTENTION'= '#f44e3b',
   'EVENT'= '#0062b1',
@@ -41,13 +60,18 @@ doccano_colour_scheme <- c(
 ```
 
 
-```{r global_frequency, echo=FALSE, message=FALSE}
+
+
+
+# Global Label Length
+```{r calculate_global_label_length}
 # create pie chart: https://r-graph-gallery.com/piechart-ggplot2.html
 # relative frequencies: https://homepages.gac.edu/~anienow2/MCS_142/R/ggplot2-barchart.html --> set aes(x = "")
 # manual category colours: https://statisticsglobe.com/change-colors-of-bars-in-ggplot2-barchart-in-r
 # change legend's title: https://www.geeksforgeeks.org/how-to-change-legend-title-in-ggplot2-in-r/
 
-global_label_frequencies <- union_annotations %>%
+global_label_length <-
+  union_annotations %>%
   # compute annotation length per category
   group_by(label) %>%
   summarise(
@@ -60,22 +84,61 @@ global_label_frequencies <- union_annotations %>%
   )
 
 # order plots by global annotation length: https://sarahleejane.github.io/learning/r/2014/09/17/ordering-factors-by-another-column-with-R.html
-global_label_frequencies$label <- reorder(global_label_frequencies$label, global_label_frequencies$total_length)
+global_label_length$label <-
+  reorder(
+    global_label_length$label,
+    global_label_length$total_length
+  )
+```
 
-# plot it
-global_label_frequencies %>%
+```{r plot_global_label_info, fig.height=2, fig.width=7}
+global_label_length %>%
+  # transform data
+  pivot_longer(
+    cols = c(total_length, n, mean_length),
+    names_to ="measure"
+  ) %>%
+  mutate(
+    measure = factor(
+      measure,
+      levels = c("n", "total_length", "mean_length"),
+      labels = c("Count", "Total Annotation Length", "Average Annotation Length")
+    )
+  ) %>%
+  
+  # sort nicely for debugging
+  arrange(measure, label) %>%
+  select(measure, label, value) %>%
+
+  # plot data
+  ggplot(aes(x = measure, y = value, fill = label)) +
+  geom_bar(stat = "identity", position = "fill") +
+  coord_flip() +
+  scale_fill_manual(values = doccano_colour_scheme) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Measure", y = "Realative Frequency", fill = "Label") +
+  theme_classic()
+```
+
+
+```{r plot_global_label_length, fig.height=2, fig.width=7}
+global_label_length %>%
   ggplot(aes(x = "", y = total_length, fill = label)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
   
   # make it pretty
-  scale_fill_manual(values = doccano_colour_scheme) +
   labs(fill = "Label") +
+  scale_fill_manual(values = doccano_colour_scheme) +
   theme_void()
 ```
 
-# Annotations per Annotator
-```{r, echo=FALSE}
+
+
+
+
+# Labels per Annotator
+```{r calculate_label_annotator_data}
 all_annotations <- all_annotations %>%
   group_by(annotator, label) %>%
   summarise(
@@ -83,16 +146,15 @@ all_annotations <- all_annotations %>%
     n = n(),
   ) %>%
   mutate(
-    annotator = factor(annotator),
     label = reorder(
       factor(label),
-      global_label_frequencies$total_length
+      global_label_length$total_length
     )
   )
 ```
 
 
-```{r echo=FALSE}
+```{r plot_label_per_annotator, fig.height=3, fig.width=7}
 # stacked bar chart: https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2 --> position = "fill"
 
 # plot it as stacked bar chart
@@ -101,13 +163,14 @@ all_annotations %>%
   geom_bar(stat = "identity", position = "fill") +
   
   # make it pretty
-  scale_fill_manual(values = doccano_colour_scheme) +
   labs(x = "Annotator", y = "Relative Label Frequency", fill = "Label") +
+  scale_fill_manual(values = doccano_colour_scheme) +
+  scale_y_continuous(labels = scales::percent) +
   theme_classic()
 ```
 
 # Annotations per Label
-```{r echo=FALSE}
+```{r plot_annotator_per_label, fig.height=3, fig.width=7}
 # plot it as stacked bar chart
 all_annotations %>%
   ggplot(aes(x = label, y = total_length, fill = annotator)) +
@@ -115,6 +178,8 @@ all_annotations %>%
   
   # make it pretty
   labs(x = "Label", y = "Relative Label Frequency", fill = "Annotator") +
+  scale_fill_brewer(palette = "Set1") +
+  scale_y_continuous(labels = scales::percent) +
   theme_classic()
 ```
 
