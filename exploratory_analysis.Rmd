@@ -59,6 +59,7 @@ global_label_frequencies <- union_annotations %>%
     label = factor(label)
   )
 
+# order plots by global annotation length: https://sarahleejane.github.io/learning/r/2014/09/17/ordering-factors-by-another-column-with-R.html
 global_label_frequencies$label <- reorder(global_label_frequencies$label, global_label_frequencies$total_length)
 
 # plot it
