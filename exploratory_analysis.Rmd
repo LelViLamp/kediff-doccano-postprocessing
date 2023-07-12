@@ -3,12 +3,12 @@ title: "Exploratory Analysis of the OALZ 1788/Q1 Annotation Dataset"
 output: html_notebook
 ---
 
-```{r eval=TRUE, echo=FALSE, message=FALSE}
+```{r packages, echo=FALSE}
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load("ggplot2", "here", "tidyverse")
 ```
 
-```{r echo=FALSE}
+```{r import_data, message=FALSE}
 all_annotations_path <- here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv")
 all_annotations <- read_csv(all_annotations_path)
 names(all_annotations)[1] <- "pandas_index"
@@ -17,7 +17,7 @@ all_annotations <- all_annotations %>%
   mutate(annotation_length = end - start)
   
 
-union_dataset_path <- here::here("data", "5-generate-union-dataset", "union_dataset.csv")
+union_dataset_path <- here::here("data", "5a-generate-union-dataset", "union_dataset.csv")
 union_annotations <- read_csv(union_dataset_path)
 names(union_annotations)[1] <- "pandas_index"
 union_annotations <- union_annotations %>%
@@ -25,7 +25,7 @@ union_annotations <- union_annotations %>%
 ```
 
 # Global Distribution of Labels
-```{r echo=FALSE}
+```{r doccano_colours, echo=FALSE}
 doccano_colour_scheme <- c(
   'ATTENTION'= '#f44e3b',
   'EVENT'= '#0062b1',
@@ -41,21 +41,28 @@ doccano_colour_scheme <- c(
 ```
 
 
-```{r echo=FALSE}
+```{r global_frequency, echo=FALSE, message=FALSE}
 # create pie chart: https://r-graph-gallery.com/piechart-ggplot2.html
 # relative frequencies: https://homepages.gac.edu/~anienow2/MCS_142/R/ggplot2-barchart.html --> set aes(x = "")
 # manual category colours: https://statisticsglobe.com/change-colors-of-bars-in-ggplot2-barchart-in-r
 # change legend's title: https://www.geeksforgeeks.org/how-to-change-legend-title-in-ggplot2-in-r/
 
-union_annotations %>%
+global_label_frequencies <- union_annotations %>%
   # compute annotation length per category
   group_by(label) %>%
   summarise(
     total_length = sum(annotation_length),
     n = n(),
   ) %>%
-  
-  # plot it
+  mutate(
+    mean_length = total_length / n,
+    label = factor(label)
+  )
+
+global_label_frequencies$label <- reorder(global_label_frequencies$label, global_label_frequencies$total_length)
+
+# plot it
+global_label_frequencies %>%
   ggplot(aes(x = "", y = total_length, fill = label)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
@@ -67,17 +74,28 @@ union_annotations %>%
 ```
 
 # Annotations per Annotator
-```{r echo=FALSE}
-# stacked bar chart: https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2 --> position = "fill"
-
-all_annotations %>%
+```{r, echo=FALSE}
+all_annotations <- all_annotations %>%
   group_by(annotator, label) %>%
   summarise(
     total_length = sum(annotation_length),
     n = n(),
   ) %>%
-  
-  # plot it as stacked bar chart
+  mutate(
+    annotator = factor(annotator),
+    label = reorder(
+      factor(label),
+      global_label_frequencies$total_length
+    )
+  )
+```
+
+
+```{r echo=FALSE}
+# stacked bar chart: https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2 --> position = "fill"
+
+# plot it as stacked bar chart
+all_annotations %>%
   ggplot(aes(x = annotator, y = total_length, fill = label)) +
   geom_bar(stat = "identity", position = "fill") +
   
@@ -89,14 +107,8 @@ all_annotations %>%
 
 # Annotations per Label
 ```{r echo=FALSE}
+# plot it as stacked bar chart
 all_annotations %>%
-  group_by(annotator, label) %>%
-  summarise(
-    total_length = sum(annotation_length),
-    n = n(),
-  ) %>%
-  
-  # plot it as stacked bar chart
   ggplot(aes(x = label, y = total_length, fill = annotator)) +
   geom_bar(stat = "identity", position = "fill") +
   
