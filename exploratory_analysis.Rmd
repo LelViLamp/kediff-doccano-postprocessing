@@ -178,6 +178,38 @@ global_label_length %>%
 ```
 
 ```{r}
+# https://stackoverflow.com/questions/54523133/adding-overall-group-to-facet-wrap-ggplot2#comment95851202_54523970 --> add "overall" column by setting 
+#     facet_grid(~label, margins = TRUE)
+#                        --------------
+
+all_annotations %>%
+  ggplot(aes(x = annotation_length, fill = label)) +
+  geom_histogram(binwidth = 10) +
+  facet_grid(~label) +
+  labs(
+    x = "Annotation Length",
+    y = "Count"
+  ) +
+  scale_fill_manual(values = doccano_colour_scheme_named) +
+  guides(fill = FALSE) +
+  theme_bw()
+```
+
+```{r}
+all_annotations %>%
+  ggplot(aes(x = label, y = annotation_length, fill = label)) +
+  geom_boxplot() +
+  labs(
+    x = "Label",
+    y = "Annotation Length",
+    fill = "Label"
+  ) +
+  scale_fill_manual(values = doccano_colour_scheme_named) +
+  theme_bw()
+```
+
+
+```{r}
 annotator_contributions <-
   all_annotations %>%
   # compute annotation length per category
@@ -186,9 +218,7 @@ annotator_contributions <-
     total_length = sum(annotation_length),
     n = n(),
   ) %>%
-  mutate(
-    mean_length = total_length / n
-  )
+  mutate(mean_length = total_length / n)
 
 annotator_contributions
 ```
@@ -220,6 +250,33 @@ annotator_contributions %>%
   scale_fill_manual(values = annotator_colour_scheme_named) +
   coord_flip() +
   theme_classic()
+```
+
+```{r}
+all_annotations %>%
+  ggplot(aes(x = annotation_length, fill = annotator)) +
+  geom_histogram(binwidth = 10) +
+  facet_grid(~annotator) +
+  labs(
+    x = "Annotation Length",
+    y = "Count"
+  ) +
+  scale_fill_manual(values = annotator_colour_scheme_named) +
+  guides(fill = FALSE) +
+  theme_bw()
+```
+
+```{r}
+all_annotations %>%
+  ggplot(aes(x = annotator, y = annotation_length, fill = annotator)) +
+  geom_boxplot() +
+  labs(
+    x = "Annotator",
+    y = "Annotation Length",
+    fill = "Annotator"
+  ) +
+  scale_fill_manual(values = annotator_colour_scheme_named) +
+  theme_bw()
 ```
 
 
@@ -271,6 +328,34 @@ label_annotator %>%
   scale_fill_manual(values = annotator_colour_scheme_named) +
   scale_y_continuous(labels = scales::percent) +
   theme_classic()
+```
+
+
+
+
+
+# Combinations
+
+```{r}
+all_annotations %>%
+  ggplot(aes(x = annotation_length)) +
+  geom_histogram(binwidth = 10) +
+  facet_grid(annotator~label) +
+  labs(
+    x = "Annotation Length",
+    y = "Count"
+  ) +
+  guides(fill = FALSE) +
+  theme_bw()
+```
+
+```{r}
+all_annotations %>%
+  ggplot(aes(y = annotation_length)) +
+  geom_boxplot() +
+  labs(y = "Annotation Length") +
+  facet_grid(annotator~label) +
+  theme_bw()
 ```
 
 
