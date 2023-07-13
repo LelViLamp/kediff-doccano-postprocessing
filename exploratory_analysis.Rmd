@@ -35,7 +35,8 @@ all_annotations <-
     ),
     
     annotation_length = end - start
-  )
+  ) %>%
+  filter(annotation_length <= 100)
 
 all_annotations %>% select(-pandas_index, -annotation_id)
 ```  
@@ -156,7 +157,11 @@ global_label_length %>%
 
   # plot data
   ggplot(aes(x = measure, y = value, fill = label)) +
-  geom_bar(stat = "identity", position = "fill") +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    col = I("black")
+  ) +
   scale_fill_manual(values = doccano_colour_scheme_named) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "Realative Frequency", fill = "Label") +
@@ -168,7 +173,11 @@ Here's the same thing as a pie chart.
 ```{r plot_global_label_length, fig.height=2, fig.width=7}
 global_label_length %>%
   ggplot(aes(x = "", y = total_length, fill = label)) +
-  geom_bar(stat = "identity", width = 1) +
+  geom_bar(
+    stat = "identity",
+    width = 1,
+    col = I("black")
+  ) +
   coord_polar("y", start = 0) +
   
   # make it pretty
@@ -184,7 +193,7 @@ global_label_length %>%
 
 all_annotations %>%
   ggplot(aes(x = annotation_length, fill = label)) +
-  geom_histogram(binwidth = 10) +
+  geom_histogram(binwidth = 10, col = I("black")) +
   facet_grid(~label) +
   labs(
     x = "Annotation Length",
@@ -244,7 +253,11 @@ annotator_contributions %>%
 
   # plot data
   ggplot(aes(x = measure, y = value, fill = annotator)) +
-  geom_bar(stat = "identity", position = "fill") +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    col = I("black")
+  ) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "Realative Frequency", fill = "Annotator") +
   scale_fill_manual(values = annotator_colour_scheme_named) +
@@ -255,7 +268,10 @@ annotator_contributions %>%
 ```{r}
 all_annotations %>%
   ggplot(aes(x = annotation_length, fill = annotator)) +
-  geom_histogram(binwidth = 10) +
+  geom_histogram(
+    binwidth = 10,
+    col = I("black")
+  ) +
   facet_grid(~annotator) +
   labs(
     x = "Annotation Length",
@@ -307,7 +323,11 @@ label_annotator <- all_annotations %>%
 # plot it as stacked bar chart
 label_annotator %>%
   ggplot(aes(x = annotator, y = total_length, fill = label)) +
-  geom_bar(stat = "identity", position = "fill") +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    col = I("black")
+  ) +
   
   # make it pretty
   labs(x = "Annotator", y = "Relative Label Frequency", fill = "Label") +
@@ -321,7 +341,11 @@ label_annotator %>%
 # plot it as stacked bar chart
 label_annotator %>%
   ggplot(aes(x = label, y = total_length, fill = annotator)) +
-  geom_bar(stat = "identity", position = "fill") +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    col = I("black")
+  ) +
   
   # make it pretty
   labs(x = "Label", y = "Relative Label Frequency", fill = "Annotator") +
@@ -351,10 +375,13 @@ all_annotations %>%
 
 ```{r}
 all_annotations %>%
-  ggplot(aes(y = annotation_length)) +
+  ggplot(aes(x = "", y = annotation_length)) +
   geom_boxplot() +
-  labs(y = "Annotation Length") +
   facet_grid(annotator~label) +
+  labs(
+    x = "",
+    y = "Annotation Length"
+  ) +
   theme_bw()
 ```
 
