@@ -77,11 +77,28 @@ jsonl = {
     "text": merged_text,
     "label": merged_labels
 }
+print(f"  * created JSONL object")
+
 annotations_path_out_jsonl = os.path.join(OUTPUT_DIR, 'merged_into_long_text.json')
 with open(annotations_path_out_jsonl, "w") as f:
     f.write(json.dumps(jsonl))
-print(f"  * Saved merged annotations as CSV to '{annotations_path_out_jsonl}'")
+print(f"  * Saved merged annotations as JSONL to '{annotations_path_out_jsonl}'")
 
+# find annotation/label's text
+for label in merged_labels:
+    start = label[0]
+    end = label[1]
+    label_text = merged_text[start:end]
+    label.append(label_text)
+    # end loop merged_labels
+csv = pd.DataFrame(merged_labels, columns =['start', 'end', 'label', 'label_text'])
+print(f"  * created dataframe including label_text")
+
+annotations_path_out_csv = os.path.join(OUTPUT_DIR, 'merged_into_long_text.csv')
+csv.to_csv(annotations_path_out_csv)
+print(f"  * Saved merged annotations as CSV to '{annotations_path_out_csv}'")
+
+# save raw/merged text
 text_path_out = os.path.join(OUTPUT_DIR, "text.csv")
 text_df.to_csv(text_path_out)
 print(f"  * Saved text to '{text_path_out}'")
