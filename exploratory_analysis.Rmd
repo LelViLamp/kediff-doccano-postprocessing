@@ -186,7 +186,7 @@ global_label_length %>%
   theme_void()
 ```
 
-```{r}
+```{r warning=FALSE}
 # https://stackoverflow.com/questions/54523133/adding-overall-group-to-facet-wrap-ggplot2#comment95851202_54523970 --> add "overall" column by setting 
 #     facet_grid(~label, margins = TRUE)
 #                        --------------
