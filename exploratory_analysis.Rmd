@@ -12,7 +12,7 @@ output:
 # Imports
 ```{r packages, message=FALSE, warning=FALSE, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
-pacman::p_load("ggplot2", "here", "scales", "tidyverse")
+pacman::p_load("ggplot2", "DT", "here", "scales", "tidyverse")
 ```
 
 ```{r import_all_annotations_ds}
@@ -38,7 +38,7 @@ all_annotations <-
   ) %>%
   filter(annotation_length <= 100)
 
-all_annotations %>% select(-pandas_index, -annotation_id)
+all_annotations %>% select(-pandas_index, -annotation_id) %>% datatable()
 ```  
 
 ```{r import_union_ds}
