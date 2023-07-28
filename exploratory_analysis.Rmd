@@ -15,7 +15,7 @@ if (!require(pacman)) install.packages("pacman")
 pacman::p_load("ggplot2", "DT", "here", "scales", "tidyverse")
 ```
 
-```{r import_all_annotations_ds}
+```{r import_all_annotations_ds, warning=FALSE}
 all_annotations <-
   here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv") %>%
   read.csv() %>%
@@ -38,7 +38,9 @@ all_annotations <-
   ) %>%
   filter(annotation_length <= 100)
 
-all_annotations %>% select(-pandas_index, -annotation_id) %>% datatable()
+all_annotations %>%
+  select(-pandas_index, -annotation_id) %>%
+  datatable()
 ```  
 
 ```{r import_union_ds}
