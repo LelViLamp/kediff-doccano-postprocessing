@@ -1,7 +1,9 @@
 ---
 title: "Exploratory Analysis of the OALZ 1788/Q1 Annotation Dataset"
-output: 
-  html_notebook: 
+output:
+  html_document:
+    df_print: paged
+  html_notebook:
     code_folding: hide
     fig_height: 3
     fig_width: 7

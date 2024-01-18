@@ -271,3 +271,5 @@ $RECYCLE.BIN/
 # R(Studio) exclusions
 .Rproj.user
 .Rhistory
+*.knit.md
+*.nb.html
