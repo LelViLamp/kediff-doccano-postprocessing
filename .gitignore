@@ -1,5 +1,10 @@
 # Manual, project-specific ignores
-data/
+data/0-raw/
+data/1-unzip/
+data/2-all-annotations-in-one-file/
+data/3-automatic-cleaning/
+data/4a-manually-handle-odd-cases/
+data/4b-handle-long-annotations/
 out/
 output/
 temp/
