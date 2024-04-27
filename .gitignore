@@ -1,10 +1,8 @@
 # Manual, project-specific ignores
-data/0-raw/
-data/1-unzip/
-data/2-all-annotations-in-one-file/
-data/3-automatic-cleaning/
-data/4a-manually-handle-odd-cases/
-data/4b-handle-long-annotations/
+data/
+!data/5a-generate-union-dataset/
+!data/5b-merge-documents/
+!data/README.md
 out/
 output/
 temp/
