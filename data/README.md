@@ -43,6 +43,8 @@ Based on the annotations above, six separate NER classifiers were trained, one f
 
 To achieve this overlap, each text passage must be run through all the classifiers individually and each classifier's results need to be combined. For details on how the training was done, see [`LelViLamp/kediff-ner-training`](https://github.com/LelViLamp/kediff-ner-training).
 
+The [`dbmdz/bert-base-historic-multilingual-cased`](https://huggingface.co/dbmdz/bert-base-historic-multilingual-cased) tokeniser was used to create historical embeddings. Therefore, it is necessary to use that in order to use these NER models.
+
 The models' performance measures are as follows:
 
 | Model                                                              | Selected Epoch | Checkpoint | Validation Loss | Precision |  Recall |   $F_1$ | Accuracy |
