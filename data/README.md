@@ -33,7 +33,7 @@ Note that both these directories contain three equivalent datasets each:
 The following categories were included in the annotation process:
 
 | Tag     | Label         | Count | Total Length | Median Annotation Length | Mean Annotation Length |    SD |
-| :------ | :------------ | ----: | -----------: | -----------------------: | ---------------------: | ----: |
+|:--------|:--------------|------:|-------------:|-------------------------:|-----------------------:|------:|
 | `EVENT` | Event         |   294 |        6,090 |                       18 |                  20.71 | 13.24 |
 | `LOC`   | Location      | 2,449 |       24,417 |                        9 |                   9.97 |  6.21 |
 | `MISC`  | Miscellaneous | 2,585 |       50,654 |                       14 |                  19.60 | 19.63 |
@@ -59,13 +59,13 @@ The [`dbmdz/bert-base-historic-multilingual-cased`](https://huggingface.co/dbmdz
 The models' performance measures are as follows:
 
 | Model                                                              | Selected Epoch | Checkpoint | Validation Loss | Precision |  Recall | F<sub>1</sub> | Accuracy |
-| :----------------------------------------------------------------- | :------------: | ---------: | --------------: | --------: | ------: | ------------: | -------: |
-| [`EVENT`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-EVENT) |       1        |     `1393` |         .021957 |   .665233 | .343066 |       .351528 |  .995700 |
-| [`LOC`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-LOC)     |       1        |     `1393` |         .033602 |   .829535 | .803648 |       .814146 |  .990999 |
-| [`MISC`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-MISC)   |       2        |     `2786` |         .123994 |   .739221 | .503677 |       .571298 |   968697 |
-| [`ORG`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-ORG)     |       1        |     `1393` |         .062769 |   .744259 | .709738 |       .726212 |  .980288 |
-| [`PER`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-PER)     |       2        |     `2786` |         .059186 |   .914037 | .849048 |       .879070 |  .983253 |
-| [`TIME`](https://huggingface.co/LelViLamp/OALZ-1788-Q1-NER-TIME)   |       1        |     `1393` |         .016120 |   .866866 | .724958 |       .783099 |  .994631 |
+|:-------------------------------------------------------------------|:--------------:|-----------:|----------------:|----------:|--------:|--------------:|---------:|
+| [`EVENT`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-event) |       1        |     `1393` |         .021957 |   .665233 | .343066 |       .351528 |  .995700 |
+| [`LOC`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-loc)     |       1        |     `1393` |         .033602 |   .829535 | .803648 |       .814146 |  .990999 |
+| [`MISC`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-misc)   |       2        |     `2786` |         .123994 |   .739221 | .503677 |       .571298 |   968697 |
+| [`ORG`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-org)     |       1        |     `1393` |         .062769 |   .744259 | .709738 |       .726212 |  .980288 |
+| [`PER`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-per)     |       2        |     `2786` |         .059186 |   .914037 | .849048 |       .879070 |  .983253 |
+| [`TIME`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-time)   |       1        |     `1393` |         .016120 |   .866866 | .724958 |       .783099 |  .994631 |
 
 ## Acknowledgements
 The data set and models were created in the project _Kooperative Erschließung diffusen Wissens_ ([KEDiff](https://uni-salzburg.elsevierpure.com/de/projects/kooperative-erschließung-diffusen-wissens-ein-literaturwissenscha)), funded by the [State of Salzburg](https://salzburg.gv.at), Austria 🇦🇹, and carried out at [Paris Lodron Universität Salzburg](https://plus.ac.at).
