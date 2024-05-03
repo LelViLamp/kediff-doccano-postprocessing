@@ -17,7 +17,18 @@ A named entity recognition system (NER) was trained on text extracted from _Ober
 
 ## Annotations
 
-Each text passage was annotated in [doccano](https://github.com/doccano/doccano) by two or three annotators and their annotations were cleaned and merged into one dataset. For details on how this was done, see [`LelViLamp/kediff-doccano-postprocessing`](https://github.com/LelViLamp/kediff-doccano-postprocessing). In total, the text consists of about 1.7m characters. The resulting annotation datasets were published on the Hugging Face Hub as [`OALZ-1788-Q1-NER-Annotations`](https://huggingface.co/datasets/LelViLamp/OALZ-1788-Q1-NER-Annotations).
+Each text passage was annotated in [doccano](https://github.com/doccano/doccano) by two or three annotators and their annotations were cleaned and merged into one dataset. For details on how this was done, see [`LelViLamp/kediff-doccano-postprocessing`](https://github.com/LelViLamp/kediff-doccano-postprocessing). In total, the text consists of about 1.7m characters. The resulting annotation datasets were published on the Hugging Face Hub as [`oalz-1788-q1-ner-annotations`](https://huggingface.co/datasets/LelViLamp/OALZ-1788-Q1-NER-Annotations).
+
+There are two versions of the dataset
+- `5a-union-dataset` contains the texts split into chunks. This is how they were presented in the annotation application doccano
+- `5b-merge-documents` does not retain this split. The text was merged into one long text and annotation indices were adapted.
+
+Note that both these directories contain three equivalent datasets each:
+- a Huggingface/Arrow dataset, <sup>*</sup>
+- a CSV, <sup>*</sup> and
+- a JSONL file.
+
+<sup>*</sup> The former two should be used together with `text.csv` to catch the context of the annotation. The latter JSONL file contains the full text.
 
 The following categories were included in the annotation process:
 
