@@ -10,10 +10,9 @@ INPUT_DIRS: list[str] = [
     os.path.join(DATA_DIR, '5b-merge-documents'),
     os.path.join(DATA_DIR, '6-huggingface-datasets')
 ]
-REPO_ID: str = "oalz-1788-q1-ner-annotations"
+REPO_ID_BASE: str = "oalz-1788-q1-ner-annotations-"
 
 print("Processing Step 7: Publish datasets to the Hugging Face Hub")
-print(f"- will publish to '{REPO_ID}'")
 print(f"- Only the results of processing steps",
       f"  * 5a (union dataset),",
       f"  * 5b (merge into one file), and",
@@ -39,29 +38,25 @@ publish_files: dict[str, list[str]] = {
     ]
 }
 
-print("- Will now upload 5a")
+union_repo_id: str = REPO_ID_BASE + "union-dataset"
+print(f"- Will now publish 5a as '{union_repo_id}'")
 union_dir: str = os.path.join(
     DATA_DIR,
     list(publish_files.keys())[1],
     publish_files["5a-generate-union-dataset"][-1]
 )
 union_hf: Dataset = Dataset.load_from_disk(dataset_path=union_dir)
-union_hf.push_to_hub(
-    repo_id=REPO_ID,
-    data_dir=os.path.join("5a-generate-union-dataset", "union_dataset")
-)
+union_hf.push_to_hub(repo_id=union_repo_id)
 
-print("- Will now upload 5b")
+long_repo_id: str = REPO_ID_BASE + "merged-union-dataset"
+print(f"- Will now publish 5b as '{long_repo_id}'")
 long_dir: str = os.path.join(
     DATA_DIR,
     list(publish_files.keys())[2],
     publish_files["5b-merge-documents"][-1]
 )
 long_hf: Dataset = Dataset.load_from_disk(dataset_path=union_dir)
-long_hf.push_to_hub(
-    repo_id=REPO_ID,
-    data_dir=os.path.join("5b-merge-documents", "merged_into_long_text")
-)
+long_hf.push_to_hub(repo_id=long_repo_id)
 
 print("- please upload the remaining files, i.e. CSVs, JSONLs, and README.md -> MANUALLY<- ")
 
