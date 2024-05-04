@@ -2,6 +2,12 @@
 
 Postprocessing pipeline on the doccano annotations to create the OALZ/1788/Q1-NER datasets happened in several steps. After placing the raw files in the correct directory as described in step 0, the pipeline can be run as a whole using `processing/run_all.py`. Each step corresponds to a separate script and temporary output directory. Scripts tell you what they did on the console. This is especially useful for checking and debugging file paths.
 
+You can find the resulting datasets of the Huggingface Hub:
+   * [`oalz-1788-q1-ner-annotations-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-union-dataset)
+   * [`oalz-1788-q1-ner-annotations-merged-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-merged-union-dataset)
+
+## Overview of the processing steps
+
 | Step | Short description                               | Name Input Directory                |
 |:----:|:------------------------------------------------|:------------------------------------|
 |  0   | Place doccano ZIP file containing JSONLs        | `0-raw`                             |
@@ -15,6 +21,8 @@ Postprocessing pipeline on the doccano annotations to create the OALZ/1788/Q1-NE
 |  5b  | Merge passages into long text.                  | `5a-union-dataset`                  |
 |  6   | Convert to HuggingFace Datasets                 | `5a-union-dataset` & `5b-long-text` |
 |  7   | Upload to HuggingFace Hub                       | `5a-union-dataset` & `5b-long-text` |
+
+## Steps in more detail
 
 0. Annotate the dataset, export a ZIP file from [doccano](https://github.com/doccano/doccano) and move it to `data/0-raw`. Use JSONL as the output format. The file name should begin with a timestamp of the format `YYYY-MM-DD_HHMM` to allow ordering the files in descending order and automatically pick the latest export. This allows re-running the processing pipeline without any additional changes.
 1. Identifies the latest ZIP file by file name as described above and extracts it. This results in one [JSON Lines file](https://jsonlines.org) per user associated with the project in doccano, including the _admin_, which gets ignored subsequently. A JSONL file contains one valid JSON string per line.
@@ -33,5 +41,24 @@ Postprocessing pipeline on the doccano annotations to create the OALZ/1788/Q1-NE
    * Suspiciously long annotations with &get; 100 characters are stored to a CSV, the user can manually indicate in the last column, whether they should be removed. This requires editing the CSV as indicated in the console before starting the next step.
    * Now, `4a` **awaits user input before continuing with** `4b`.
    * `4b` removes those lines the user did not want to keep. Default is that annotations are kept.
-5. 
+5. Removes annotator information and merges overlapping annotations of the same label into one annotation. See example below. It is probably best to look at the code of step `5a` to see how this was done. Step `5b` takes this "**union dataset**" and removes the text passage boundaries, i.e., all subtexts are concatenated and all annotation indices refer to this merged text.
+6. Converts the two resulting datasets of step 5 to a HuggingFace Dataset.
+7. Automatically uploads the datasets from step 6 to the HuggingFace Hub. Note that the CSV, JSONL, README.md and text.csv files need to be updated **_manually_**.
+   * [`LelViLamp/oalz-1788-q1-ner-annotations-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-union-dataset)
+   * [`LelViLamp/oalz-1788-q1-ner-annotations-merged-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-merged-union-dataset)
 
+### Example of overlapping annotations
+```
+Annotator 1     |                              -- PER --
+Annotator 2     |       ------ PER --------
+                |                       -------- ORG ---
+Annotator 3     |  ----- PER -----             
+                |               -- MISC --
+=============================================================
+Combined        |  ------- PER ------------    -- PER --
+                                        -------- ORG ---
+                                -- MISC --
+```
+
+* `PER` of annotator 2 and 3 are merged, all others are retained
+* Note that `PER` of annotator 1 is not merged, as it does not "touch" and other ´PER` label.
