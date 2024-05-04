@@ -1,27 +1,28 @@
 import os
-from typing import Tuple
+from typing import Tuple, Any, Hashable
 
 import pandas as pd
+from pandas import DataFrame, Series
 
 from project_paths import DATA_DIR
 
-INPUT_DIR = os.path.join(DATA_DIR, '2-all-annotations-in-one-file')
-OUTPUT_DIR = os.path.join(DATA_DIR, '3-automatic-cleaning')
+INPUT_DIR: str = os.path.join(DATA_DIR, '2-all-annotations-in-one-file')
+OUTPUT_DIR: str = os.path.join(DATA_DIR, '3-automatic-cleaning')
 
 print("Processing Step 3: Apply heuristics to automatically clean annotations")
 print(f"- Data imported from '{INPUT_DIR}'")
 print(f"- Result will be written to '{OUTPUT_DIR}'")
 
-text_path = os.path.join(INPUT_DIR, 'text.csv')
-annotations_path = os.path.join(INPUT_DIR, 'annotations.csv')
+text_path: str = os.path.join(INPUT_DIR, 'text.csv')
+annotations_path: str = os.path.join(INPUT_DIR, 'annotations.csv')
 
-text_df = pd.read_csv(text_path)
-annotations_df = pd.read_csv(annotations_path)
+text_df: DataFrame = pd.read_csv(text_path)
+annotations_df: DataFrame = pd.read_csv(annotations_path)
 print(f"- Imported {len(text_df)} lines of text and {len(annotations_df)} annotations")
 
 # remove non-NER labels 'ATTENTION', 'POSTCORR', and 'Personal Bookmark'
 print("- Remove non-NER labels 'ATTENTION', 'POSTCORR', and 'Personal Bookmark'")
-remove_us = annotations_df[
+remove_us: DataFrame = annotations_df[
     (annotations_df['label'] == 'ATTENTION') |
     (annotations_df['label'] == 'POSTCORR') |
     (annotations_df['label'] == 'Personal Bookmark')]
@@ -31,7 +32,7 @@ del remove_us
 
 # merge '?' label into 'MISC'
 print(f"- Merge the '?' label into 'MISC'")
-rename_us = annotations_df[annotations_df['label'] == '?']
+rename_us: DataFrame = annotations_df[annotations_df['label'] == '?']
 annotations_df['label'].mask(annotations_df['label'] == '?', 'MISC', inplace=True)
 print(f"  {len(rename_us)} entries labelled '?' were identified and renamed")
 del rename_us
@@ -44,9 +45,11 @@ print("- Apply heuristics to annotations")
 print("  * define functions")
 
 
-def truncate_spaces(label_text: str,
-                    start: int,
-                    end: int) -> Tuple[str, int, int]:
+def truncate_spaces(
+        label_text: str,
+        start: int,
+        end: int
+) -> Tuple[str, int, int]:
     """
     Truncate leading and following spaces of an annotation
     and adapt indices of annotation in case of removed spaces.
@@ -83,11 +86,14 @@ def truncate_spaces(label_text: str,
             label_text = stripped_text
 
     return label_text, start, end
+    # end def truncate_spaces
 
 
-def remove_articles(label_text: str,
-                    start: int,
-                    end: int) -> Tuple[str, int, int]:
+def remove_articles(
+        label_text: str,
+        start: int,
+        end: int
+) -> Tuple[str, int, int]:
     """
     Leading articles should not be included in annotation
     (der, die, das, den, dem, des, d., ein, eine, einen, einem, einer, eines)
@@ -107,37 +113,40 @@ def remove_articles(label_text: str,
     """
 
     # determine how many characters need to be removed
-    rem_chars: int
-    # bestimmter Artikel
+    n_chars_removed: int
+    # definite article / bestimmter Artikel
     if label_text.lower().startswith(('der ', 'die ', 'das ', 'den ', 'dem ', 'des ', 'd. ')):
         if label_text.lower().startswith('d. '):
-            rem_chars = 3
+            n_chars_removed = 3
         else:
-            rem_chars = 4
-    # unbestimmter Artikel
+            n_chars_removed = 4
+    # indefinite article / unbestimmter Artikel
     elif label_text.lower().startswith(("ein ", "eine ", "einen ", "einem ", "einer ", "eines ")):
-        rem_chars: int
+        n_chars_removed: int
         if label_text.lower().startswith("ein "):
-            rem_chars = 4
+            n_chars_removed = 4
         elif label_text.lower().startswith("eine "):
-            rem_chars = 5
+            n_chars_removed = 5
         else:
-            rem_chars = 6
+            n_chars_removed = 6
     # no article to be removed
     else:
-        rem_chars = 0
+        n_chars_removed = 0
 
     # perform removal
-    label_text = label_text[rem_chars:]
-    start += rem_chars
+    label_text = label_text[n_chars_removed:]
+    start += n_chars_removed
 
     # return
     return label_text, start, end
+    # end def
 
 
-def remove_final_full_stop_of_abbreviation(label_text: str,
-                                           start: int,
-                                           end: int) -> Tuple[str, int, int]:
+def remove_final_full_stop_of_abbreviation(
+        label_text: str,
+        start: int,
+        end: int
+) -> Tuple[str, int, int]:
     """
     If last character is a full stop and annotation text's length is maximum 5,
     consider it as an abbreviation and remove the full stop.
@@ -157,42 +166,47 @@ def remove_final_full_stop_of_abbreviation(label_text: str,
     """
 
     # perform removal
-    if label_text.endswith('.'):
-        if len(label_text) <= 5:
-            end -= 1
-            label_text = label_text[:-1]
+    if label_text.endswith('.') and len(label_text) <= 5:
+        end -= 1
+        label_text = label_text[:-1]
 
     return label_text, start, end
+    # end def
 
 
 print("  * loop over dataframe and apply heuristics")
+index: int
+row: Series
 for index, row in annotations_df.iterrows():
-    label_text = row['label_text']
-    start = row['start']
-    end = row['end']
+    label_text: str = row['label_text']
+    start: int = row['start']
+    end: int = row['end']
 
     if not isinstance(label_text, str):
         continue
 
+    # calculate new annotation indices and referred text
     label_text, start, end = truncate_spaces(label_text, start, end)
     label_text, start, end = remove_articles(label_text, start, end)
     label_text, start, end = remove_final_full_stop_of_abbreviation(label_text, start, end)
 
+    # apply them in dataframe
     annotations_df.at[index, 'label_text'] = label_text
     annotations_df.at[index, 'start'] = start
     annotations_df.at[index, 'end'] = end
+    # end for
 del index, row, label_text, start, end
 
 print("  * applied cleaning heuristics")
 
-automatically_cleaned_path = os.path.join(OUTPUT_DIR, 'automatically_cleaned_annotations.csv')
-text_path = text_path.replace(INPUT_DIR, OUTPUT_DIR)
+automatically_cleaned_path: str = os.path.join(OUTPUT_DIR, 'automatically_cleaned_annotations.csv')
+new_text_path: str = text_path.replace(INPUT_DIR, OUTPUT_DIR)
 
-print(f"- Materialise dataframes to '{automatically_cleaned_path}' and '{text_path}'")
+print(f"- Materialise dataframes to '{automatically_cleaned_path}' and '{new_text_path}'")
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"  created non-existing output directory '{OUTPUT_DIR}'")
 annotations_df.to_csv(automatically_cleaned_path, index=False)
-text_df.to_csv(text_path, index=False)
+text_df.to_csv(new_text_path, index=False)
 
 print("- Finished automatic cleaning")

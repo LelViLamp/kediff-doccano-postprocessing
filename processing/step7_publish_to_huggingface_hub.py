@@ -6,8 +6,8 @@ from datasets import load_dataset, Dataset
 from project_paths import DATA_DIR
 
 INPUT_DIRS: list[str] = [
-    os.path.join(DATA_DIR, '5a-generate-union-dataset'),
-    os.path.join(DATA_DIR, '5b-merge-documents'),
+    os.path.join(DATA_DIR, '5a-union-dataset'),
+    os.path.join(DATA_DIR, '5b-long-text'),
     os.path.join(DATA_DIR, '6-huggingface-datasets')
 ]
 REPO_ID_BASE: str = "oalz-1788-q1-ner-annotations-"
@@ -25,13 +25,13 @@ print(f"- Only the results of processing steps",
 print("- This means that the following files/directories are going to be published:")
 publish_files: dict[str, list[str]] = {
     "general": ["README.md"],
-    "5a-generate-union-dataset": [
+    "5a-union-dataset": [
         "text.csv",
         "union_dataset.csv",
         "union_dataset.jsonl",
         "union_dataset/"
     ],
-    "5b-merge-documents": [
+    "5b-long-text": [
         "merged_into_long_text.csv",
         "merged_into_long_text.jsonl",
         "merged_into_long_text/"
@@ -43,7 +43,7 @@ print(f"- Will now publish 5a as '{union_repo_id}'")
 union_dir: str = os.path.join(
     DATA_DIR,
     list(publish_files.keys())[1],
-    publish_files["5a-generate-union-dataset"][-1]
+    publish_files["5a-union-dataset"][-1]
 )
 union_hf: Dataset = Dataset.load_from_disk(dataset_path=union_dir)
 union_hf.push_to_hub(repo_id=union_repo_id)
@@ -53,7 +53,7 @@ print(f"- Will now publish 5b as '{long_repo_id}'")
 long_dir: str = os.path.join(
     DATA_DIR,
     list(publish_files.keys())[2],
-    publish_files["5b-merge-documents"][-1]
+    publish_files["5b-long-text"][-1]
 )
 long_hf: Dataset = Dataset.load_from_disk(dataset_path=union_dir)
 long_hf.push_to_hub(repo_id=long_repo_id)

@@ -1,7 +1,9 @@
 # Manual, project-specific ignores
-data/
-!data/5a-generate-union-dataset/
-!data/5b-merge-documents/
+data/*
+!data/5a-union-dataset
+data/5a-union-dataset/union_dataset/
+!data/5b-long-text
+data/5b-long-text/merged_into_long_text/
 !data/README.md
 out/
 output/

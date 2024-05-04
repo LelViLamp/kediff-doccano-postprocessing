@@ -7,8 +7,8 @@ from pandas import DataFrame
 
 from processing.project_paths import DATA_DIR
 
-INPUT_CSVs = {'5a': os.path.join(DATA_DIR, "5a-generate-union-dataset", "union_dataset.csv"),
-              '5b': os.path.join(DATA_DIR, "5b-merge-documents", "merged_into_long_text.csv"), }
+INPUT_CSVs = {'5a': os.path.join(DATA_DIR, "5a-union-dataset", "union_dataset.csv"),
+              '5b': os.path.join(DATA_DIR, "5b-long-text", "merged_into_long_text.csv"), }
 
 print("Processing Step 6: Convert to HuggingFace datasets")
 
