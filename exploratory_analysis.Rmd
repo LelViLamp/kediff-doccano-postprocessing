@@ -26,13 +26,13 @@ all_annotations <-
     annotation_id = factor(annotation_id),
     annotator = factor(
       annotator,
-      levels = c("cborgelt", "danielE", "danielG", "katharina", "sascha"),
+      levels = c("cborgelt",  "danielE",   "danielG",   "katharina", "sascha"),
       labels = c("Christian", "Daniel E.", "Daniel G.", "Katharina", "Sascha")
     ),
     line_id = factor(line_id),
     label = factor(
       label,
-      levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      levels = c("EVENT", "LOC",      "MISC",          "ORG",          "PER",    "TIME"),
       labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
     ),
     
@@ -54,7 +54,7 @@ union_annotations <-
     annotation_id = factor(annotation_id),
     line_id = factor(line_id),
     label = factor(label,
-      levels = c("EVENT", "LOC", "MISC", "ORG", "PER", "TIME"),
+      levels = c("EVENT", "LOC",      "MISC",          "ORG",          "PER",    "TIME"),
       labels = c("Event", "Location", "Miscellaneous", "Organisation", "Person", "Time")
     ),
     
@@ -152,7 +152,7 @@ global_label_length %>%
   mutate(
     measure = factor(
       measure,
-      levels = c("count", "total_length", "mean_length", "median_length"),
+      levels = c("count", "total_length",            "mean_length",               "median_length"),
       labels = c("Count", "Total Annotation Length", "Average Annotation Length", "Median Annotation Length")
     )
   ) %>%
@@ -251,7 +251,7 @@ annotator_contributions %>%
   mutate(
     measure = factor(
       measure,
-      levels = c("count", "total_length", "mean_length", "median_length"),
+      levels = c("count", "total_length",            "mean_length",               "median_length"),
       labels = c("Count", "Total Annotation Length", "Average Annotation Length", "Median Annotation Length")
     )
   ) %>%
