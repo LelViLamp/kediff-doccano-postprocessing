@@ -17,18 +17,16 @@ A named entity recognition system (NER) was trained on text extracted from _Ober
 
 ## Annotations
 
-Each text passage was annotated in [doccano](https://github.com/doccano/doccano) by two or three annotators and their annotations were cleaned and merged into one dataset. For details on how this was done, see [`LelViLamp/kediff-doccano-postprocessing`](https://github.com/LelViLamp/kediff-doccano-postprocessing). In total, the text consists of about 1.7m characters. The resulting annotation datasets were published on the Hugging Face Hub as [`oalz-1788-q1-ner-annotations`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations).
-
-There are two versions of the dataset
-- [`5a-generate-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations/tree/main/5a-generate-union-dataset) contains the texts split into chunks. This is how they were presented in the annotation application doccano
-- [`5b-merge-documents`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations/tree/main/5b-merge-documents) does not retain this split. The text was merged into one long text and annotation indices were adapted.
+Each text passage was annotated in [doccano](https://github.com/doccano/doccano) by two or three annotators and their annotations were cleaned and merged into one dataset. For details on how this was done, see [`LelViLamp/kediff-doccano-postprocessing`](https://github.com/LelViLamp/kediff-doccano-postprocessing). In total, the text consists of about 1.7m characters. The resulting annotation datasets were published on the Hugging Face Hub. There are two versions of the dataset
+- [`union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-union-dataset) contains the texts split into chunks. This is how they were presented in the annotation application doccano and results from preprocessing step 5a.
+- [`merged-union-dataset`](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-merged-union-dataset) does not retain this split. The text was merged into one long text and annotation indices were adapted in preprocessing step 5b.
 
 Note that both these directories contain three equivalent datasets each:
 - a Huggingface/Arrow dataset, <sup>*</sup>
 - a CSV, <sup>*</sup> and
 - a JSONL file.
 
-<sup>*</sup> The former two should be used together with `text.csv` to catch the context of the annotation. The latter JSONL file contains the full text.
+<sup>*</sup> The former two should be used together with the provided `text.csv` to catch the context of the annotation. The latter JSONL file contains the full text.
 
 The following categories were included in the annotation process:
 
@@ -43,14 +41,32 @@ The following categories were included in the annotation process:
 
 ## NER models
 
-Based on the annotations above, six separate NER classifiers were trained, one for each label type. This was done in order to allow overlapping annotations. For example, you would want to categorise the whole passage "Universität Salzburg" as an organisation while also extracting "Salzburg" as a location. This would result in an annotation like this:
+Based on the annotations above, six separate NER classifiers were trained, one for each label type. This was done in order to allow overlapping annotations. For example, in the passage "Dieses Projekt wurde an der Universität Salzburg durchgeführt", you would want to categorise "Universität Salzburg" as an organisation while also extracting "Salzburg" as a location. This would result in an annotation like this:
 
 ```json
 {
-  "text": "Universität Salzburg",
-  "label": [[0, 20, "ORG"], [12, 20, "LOC"]]
+  "id": "example-42",
+  "text": "Dieses Projekt wurde an der Universität Salzburg durchgeführt",
+  "label": [[28, 49, "ORG"], [40, 49, "LOC"]]
 }
 ```
+
+Example entry in CSV and Huggingface dataset
+
+| annotation_id | line_id    | start | end | label | label_text           | merged |
+|:--------------|:-----------|------:|----:|:------|:---------------------|:------:|
+| $n$           | example-42 |    28 |  49 | ORG   | Universität Salzburg |  ???   |
+| $n+1$         | example-42 |    40 |  49 | LOC   | Salzburg             |  ???   |
+
+The columns mean:
+- `annotation_id` was assigned internally by enumerating all annotations. This is not present in the JSONL format
+- `line_id` is the fragment of the subdivided text, as shown in doccano. Called `id` in the JSONL dataset.
+- `start` index of the first character that is annotated. Included, starts with 0.
+- `end` index of the last character that is annotated. Excluded, maximum value is `len(respectiveText)`.
+- `label` indicates what the passage indicated by $[start, end)$ was annotated as.
+- `label_text` contains the text that is annotated by $[start, end)$. This is not present in the JSONL dataset as it can be inferred there.
+- `merged` indicates whether this annotation is the result of overlapping annotations of the same label. In that case, `annotation_id` contains the IDs of the individual annotations it was constructed of. This is not present in the JSONL dataset.
+
 
 To achieve this overlap, each text passage must be run through all the classifiers individually and each classifier's results need to be combined. For details on how the training was done, see [`LelViLamp/kediff-ner-training`](https://github.com/LelViLamp/kediff-ner-training).
 
