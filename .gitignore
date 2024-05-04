@@ -5,6 +5,7 @@ data/5a-union-dataset/union_dataset/
 !data/5b-long-text
 data/5b-long-text/merged_into_long_text/
 !data/README.md
+exploratory_analysis.html
 out/
 output/
 temp/
