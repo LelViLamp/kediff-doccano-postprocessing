@@ -1,5 +1,9 @@
 # Postprocessing and generation of the OALZ/1788/Q1-NER Datasets
 
+- [**_Postprocessing_**](https://github.com/LelViLamp/kediff-doccano-postprocessing)
+- [Training](https://github.com/LelViLamp/kediff-ner-training)
+- Published datasets ([union](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-union-dataset), [merged union](https://huggingface.co/datasets/LelViLamp/oalz-1788-q1-ner-annotations-merged-union-dataset)) and models ([`EVENT`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-event), [`LOC`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-loc), [`MISC`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-misc), [`ORG`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-org), [`PER`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-per), [`TIME`](https://huggingface.co/LelViLamp/oalz-1788-q1-ner-time))
+
 Postprocessing pipeline on the doccano annotations to create the OALZ/1788/Q1-NER datasets happened in several steps. After placing the raw files in the correct directory as described in step 0, the pipeline can be run as a whole using `processing/run_all.py`. Each step corresponds to a separate script and temporary output directory. Scripts tell you what they did on the console. This is especially useful for checking and debugging file paths.
 
 You can find the resulting datasets of the Huggingface Hub:
