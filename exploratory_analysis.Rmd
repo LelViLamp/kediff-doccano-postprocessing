@@ -22,7 +22,7 @@ pacman::p_load("ggplot2", "DT", "here", "scales", "tidyverse")
 ```
 
 ## Datasets
-```{r import_all_annotations_ds, warning=FALSE}
+```{r import_all_annotations_ds, warning=FALSE, results='hide'}
 all_annotations <-
   here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv") %>%
   read.csv() %>%
@@ -50,7 +50,7 @@ all_annotations %>%
   datatable()
 ```  
 
-```{r import_union_ds}
+```{r import_union_dsm, results='hide'}
 union_annotations <-
   here::here("data", "5a-union-dataset", "union_dataset.csv") %>%
   read.csv() %>%
