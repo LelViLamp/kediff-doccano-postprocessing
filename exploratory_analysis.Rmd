@@ -15,11 +15,13 @@ output:
 
 
 # Imports
+## Packages
 ```{r packages, message=FALSE, warning=FALSE, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load("ggplot2", "DT", "here", "scales", "tidyverse")
 ```
 
+## Datasets
 ```{r import_all_annotations_ds, warning=FALSE}
 all_annotations <-
   here::here("data", "4b-handle-long-annotations", "cleaned_annotations.csv") %>%
@@ -29,8 +31,8 @@ all_annotations <-
     annotation_id = factor(annotation_id),
     annotator = factor(
       annotator,
-      levels = c("cborgelt",  "danielE",   "danielG",   "katharina", "sascha"),
-      labels = c("Christian", "Daniel E.", "Daniel G.", "Katharina", "Sascha")
+      levels = c("cborgelt", "danielE", "danielG", "katharina", "sascha"),
+      labels = c("ChB",      "DaE",     "DaG",     "KaB",       "SaS")
     ),
     line_id = factor(line_id),
     label = factor(
@@ -67,44 +69,45 @@ union_annotations <-
 union_annotations %>% select(-pandas_index, -annotation_id)
 ```
 
+## Colour Schemes
 ```{r define_doccano_colours}
 doccano_colour_scheme_technical <- c(
-  'ATTENTION'= '#f44e3b',
-  'EVENT'= '#0062b1',
-  'LOC'= '#7b64ff',
-  'MISC'= '#a79c4f',
-  'ORG'= '#16a5a5',
-  'PER'= '#fcdc00',
-  'Personal Bookmark'= '#fda1ff',
-  'POSTCORR'= '#9f0500',
-  'TIME'= '#73d8ff',
-  '?'= '#cccccc'
+  'ATTENTION'         = '#f44e3b',
+  'EVENT'             = '#0062b1',
+  'LOC'               = '#7b64ff',
+  'MISC'              = '#a79c4f',
+  'ORG'               = '#16a5a5',
+  'PER'               = '#fcdc00',
+  'Personal Bookmark' = '#fda1ff',
+  'POSTCORR'          = '#9f0500',
+  'TIME'              = '#73d8ff',
+  '?'                 = '#cccccc'
 )
 
 doccano_colour_scheme_named <- c(
-  'Event'= '#0062b1',
-  'Location'= '#7b64ff',
-  'Miscellaneous'= '#a79c4f',
-  'Organisation'= '#16a5a5',
-  'Person'= '#fcdc00',
-  'Time'= '#73d8ff'
+  'Event'             = '#0062b1',
+  'Location'          = '#7b64ff',
+  'Miscellaneous'     = '#a79c4f',
+  'Organisation'      = '#16a5a5',
+  'Person'            = '#fcdc00',
+  'Time'              = '#73d8ff'
 )
 ```
 
 ```{r define_annotator_colours}
 annotator_colour_scheme_technical = c(
-  'danielE' = '#ff7f00',
+  'danielE'   = '#ff7f00',
   'katharina' = '#e4211c',
-  'cborgelt' = '#377eb8',
-  'danielG' = '#984ea3',
-  'sascha' = '#4daf4a'
+  'cborgelt'  = '#377eb8',
+  'danielG'   = '#984ea3',
+  'sascha'    = '#4daf4a'
 )
 annotator_colour_scheme_named = c(
-  'Daniel E.' = '#ff7f00',
-  'Katharina' = '#e4211c',
-  'Christian' = '#377eb8',
-  'Daniel G.' = '#984ea3',
-  'Sascha' = '#4daf4a'
+  'DaE'       = '#ff7f00',
+  'KaB'       = '#e4211c',
+  'ChB'       = '#377eb8',
+  'DaG'       = '#984ea3',
+  'SaS'       = '#4daf4a'
 )
 ```
 
@@ -228,6 +231,7 @@ all_annotations %>%
 ```
 
 
+# Per Annotator
 ```{r}
 annotator_contributions <-
   all_annotations %>%
@@ -312,7 +316,7 @@ all_annotations %>%
 
 
 
-# Labels per Annotator
+# Labels and Annotator Combined
 ```{r calculate_label_annotator_data}
 label_annotator <- all_annotations %>%
   group_by(annotator, label) %>%
