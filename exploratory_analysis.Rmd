@@ -132,7 +132,9 @@ global_label_length <-
     total_length = sum(annotation_length),
     median_length = median(annotation_length),
     mean_length = mean(annotation_length),
-    sd_length = sd(annotation_length)
+    sd_length = sd(annotation_length),
+    min_length = min(annotation_length),
+    max_length = max(annotation_length)
   ) %>%
   mutate(
     label = factor(label)
@@ -242,7 +244,9 @@ annotator_contributions <-
     total_length = sum(annotation_length),
     median_length = median(annotation_length),
     mean_length = mean(annotation_length),
-    sd_length = sd(annotation_length)
+    sd_length = sd(annotation_length),
+    min_length = min(annotation_length),
+    max_length = max(annotation_length)
   ) %>%
   add_column(
     block = c("A", "B", "A", "A", "B"),
