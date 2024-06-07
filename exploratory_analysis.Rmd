@@ -243,7 +243,13 @@ annotator_contributions <-
     median_length = median(annotation_length),
     mean_length = mean(annotation_length),
     sd_length = sd(annotation_length)
-  )
+  ) %>%
+  add_column(
+    block = c("A", "B", "A", "A", "B"),
+    #         ChB  DaE  DaG  KaB  SaS
+    .before = 1
+  ) %>%
+  arrange(block, annotator)
 
 annotator_contributions
 ```
